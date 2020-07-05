@@ -1,0 +1,3 @@
+# Replace with the path to OpenSSL 1.1 library
+
+OSSL=/usr/local/opt/openssl@1.1

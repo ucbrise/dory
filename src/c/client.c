@@ -375,7 +375,6 @@ cleanup:
     if (results) free(results);
     return rv;
 }
-#endif
 
 /* Update the client state.. */
 void updateClientState(client *c, int numDocs, uint32_t *versions) {

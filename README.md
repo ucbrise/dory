@@ -4,6 +4,8 @@ DORY is an encrypted search system that splits trust between multiple servers in
 
 **WARNING**: This is an academic proof-of-concept prototype and has not received careful code review. This implementation is NOT ready for production use.
 
+This prototype is released under the Apache v2 license (see [License](#license)).
+
 ## Setup
 1. Install OpenSSL 1.1.
 2. Create a copy of `CONFIG` called `CONFIG.mine` that contains the path to your installation of OpenSSL 1.1.

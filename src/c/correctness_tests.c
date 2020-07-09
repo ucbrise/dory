@@ -236,7 +236,6 @@ int main(int argc, const char *argv[]) {
 
     CHECK_C (runSemiHonestTests());
     CHECK_C (runMaliciousTests());
-    CHECK_C (aesGcmTests());
 cleanup:
     if (rv == ERROR) {
         printf("\n*** EXITED EARLY DUE TO ERROR! ***\n");

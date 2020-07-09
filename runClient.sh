@@ -83,5 +83,5 @@ done
 
 echo "bench_dir='$bench_dir', tests='$correct', bf_sz='$bf_sz', num_docs='$num_docs'"
 
-CGO_CFLAGS="-I"$OSSL"/include" CGO_LDFLAGS="-L"$OSSL"/lib -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/bench/client.go --config=src/config/client.config --test="$correct" --bench_dir="$bench_dir" --bf_sz="$bf_sz" --num_docs="$num_docs" --malicious="$malicious" --fast_setup="$fast_setup" --use_master="$use_master" --throughput="$throughput" --throughput_sec="$throughput_sec" --throughput_threads="$throughput_threads" --num_updates="$num_updates" --num_searches="$num_searches" --num_clusters="$num_clusters" --only_setup="$only_setup"
+CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/bench/client.go --config=src/config/client.config --test="$correct" --bench_dir="$bench_dir" --bf_sz="$bf_sz" --num_docs="$num_docs" --malicious="$malicious" --fast_setup="$fast_setup" --use_master="$use_master" --throughput="$throughput" --throughput_sec="$throughput_sec" --throughput_threads="$throughput_threads" --num_updates="$num_updates" --num_searches="$num_searches" --num_clusters="$num_clusters" --only_setup="$only_setup"
 

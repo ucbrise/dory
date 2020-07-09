@@ -7,11 +7,10 @@ DORY is an encrypted search system that splits trust between multiple servers in
 This prototype is released under the Apache v2 license (see [License](#license)).
 
 ## Setup
-1. Install OpenSSL 1.1.
-2. Create a copy of `CONFIG` called `CONFIG.mine` that contains the path to your installation of OpenSSL 1.1.
-3. Run `go get github.com/hashicorp/go-msgpack/codec`.
-4. Download and build `libstemmer` (http://snowball.tartarus.org/download.html).
-5. Move the output `libstemmer.o` to `src/c/`.
+1. Install OpenSSL.
+2. Run `go get github.com/hashicorp/go-msgpack/codec`.
+3. Download and build `libstemmer` (http://snowball.tartarus.org/download.html).
+4. Move the output `libstemmer.o` to `src/c/`.
 
 ## Configuration
 Update the config files in `src/config/` to reflect the IP addresses and ports for the master, servers, and client. Default TLS keys and certificates are included for testing, although these should be freshly generated for security. To use config files with different names, update `runMaster.sh`, `runServer.sh`, and/or `runClient.sh`.

@@ -34,4 +34,4 @@ done
 
 echo "bench_dir='$bench_dir', bf_sz='$bf_sz', max_docs='$max_docs', server_num='$server_num'"
 
-CGO_CFLAGS="-I"$OSSL"/include" CGO_LDFLAGS="-L"$OSSL"/lib -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/server/server.go --config=src/config/server"$server_num".config --bf_sz="$bf_sz" --max_docs="$max_docs"
+CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/server/server.go --config=src/config/server"$server_num".config --bf_sz="$bf_sz" --max_docs="$max_docs"

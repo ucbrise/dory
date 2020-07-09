@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <pthread.h>
 
 /* Setup for client. */
 int initializeClient(client *c, int numThreads, uint8_t *maskKey, uint8_t *macKey1, uint8_t *macKey2) {

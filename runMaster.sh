@@ -33,4 +33,4 @@ done
 echo "bench_dir='$bench_dir', bf_sz='$bf_sz', max_docs='$max_docs', malicious='$malicious'"
 
 
-CGO_CFLAGS="-I"$OSSL"/include" CGO_LDFLAGS="-L"$OSSL"/lib -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/master/master.go --config=src/config/master.config --bf_sz="$bf_sz" --max_docs="$max_docs" --malicious="$malicious" --tick_ms="$tick_ms"
+CGO_LDFLAGS="-lssl -lcrypto -lm -lpthread "$PWD"/src/c/libstemmer.o" go run src/master/master.go --config=src/config/master.config --bf_sz="$bf_sz" --max_docs="$max_docs" --malicious="$malicious" --tick_ms="$tick_ms"

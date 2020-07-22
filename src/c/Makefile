@@ -1,10 +1,10 @@
-include ../../CONFIG.mine
+#include ../../CONFIG.mine
 
 CC=gcc
 CFLAGS= -Wall
 #CFLAGS= -Wall -I/usr/local/opt/openssl@1.1/include
 #CFLAGS= -Wall -O2 -I/usr/local/opt/openssl@1.1/include
-LDFLAGS= -lcrypto -lssl -lm libstemmer.o 
+LDFLAGS= -lcrypto -lssl -lm -lpthread libstemmer.o 
 #LDFLAGS= -L/usr/local/opt/openssl@1.1/lib -lssl -lcrypto -lssl -lm 
 SOURCES= dpf.c client.c server.c params.c test.c correctness_tests.c tokenize.o
 OBJECTS=$(SOURCES:.c=.o)
@@ -26,5 +26,7 @@ $(LIB): dpf.o client.o server.o params.o test.o correctness_tests.o tokenize.o
 
 .PHONY: clean
 clean:
+	mv libstemmer.o libstemmer.old
 	rm -f *.o
+	mv libstemmer.old libstemmer.o
 #	rm -f *.o $(LIB) $(OBJECTS) $(EXECUTABLE)

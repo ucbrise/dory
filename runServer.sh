@@ -1,6 +1,4 @@
-source CONFIG.mine
-
-max_docs="1024"
+max_docs="128"
 bf_sz="1120"
 correct="false"
 
@@ -34,4 +32,4 @@ done
 
 echo "bench_dir='$bench_dir', bf_sz='$bf_sz', max_docs='$max_docs', server_num='$server_num'"
 
-CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/server/server.go --config=src/config/server"$server_num".config --bf_sz="$bf_sz" --max_docs="$max_docs"
+CGO_CFLAGS="-I./libsolv-sys/src -D LIBSOLV_INTERNAL -w" CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/server/server.go --config=src/config/server"$server_num".config --bf_sz="$bf_sz" --max_docs="$max_docs"

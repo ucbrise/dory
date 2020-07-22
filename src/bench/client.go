@@ -3,6 +3,7 @@ package main
 // TODO: figure out openmp and add back -fopenmp
 
 import (
+    "bufio"
     "client"
     "log"
     "flag"
@@ -110,8 +111,60 @@ func runParallelBenchmark(configFile string, numDocs int, bloomFilterSz int, use
     client.Cleanup()
 }
 
+func runInteractiveSearches(configFile string, numDocs int, bloomFilterSz int, isMalicious bool, useMaster bool, inputDir string) {
+    log.Println("Initializing client...")
+    client.Setup(configFile, bloomFilterSz, numDocs)
+    conn := client.OpenConnection()
+
+    files,_ := ioutil.ReadDir(inputDir)
+    numDocs = len(files)
+    for docID, file := range files {
+            var err error
+            docID = docID % numDocs
+            filename := inputDir + "/" + file.Name()
+            if (isMalicious) {
+                err = client.UpdateDocFile_malicious(conn, filename, docID, useMaster)
+            } else {
+                err = client.UpdateDocFile_semihonest(conn, filename, docID, useMaster)
+            }
+            if err != nil {
+                log.Fatal(err)
+            }
+    }
+    log.Println("Finished updates")
+
+    input := bufio.NewScanner(os.Stdin)
+
+    log.Printf("Enter a keyword to search for: ")
+
+    for input.Scan() {
+        var docs []byte
+        keyword := input.Text()
+        if (isMalicious) {
+            docs, _, _, _, _, _  = client.SearchKeyword_malicious(conn, keyword, useMaster)
+        } else {
+            docs, _ = client.SearchKeyword_semihonest(conn, keyword, useMaster)
+        }
+        log.Printf("Found %s in: \n", keyword)
+        found := false
+        for i := uint(0); i < uint(numDocs); i++ {
+            if (docs[i / 8] & (1 << (i % 8)) != 0) {
+                log.Printf("... present in document %d\n", i)
+                found = true
+            }
+        }
+        if (!found) {
+            log.Printf("... did not find keyword\n")
+        }
+        log.Printf("Enter a keyword to search for: ")
+    }
+
+
+    log.Println("Finished updates")
+}
+
 /* Run search latency benchmark without parallelism, including time breakdown. */
-func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, isMalicious bool, fastSetup bool, useMaster bool) {
+func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, isMalicious bool, fastSetup bool, useMaster bool, latencyPrints bool) {
     /* Initialize client */
 
     numTrials := 1
@@ -183,15 +236,17 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
         log.Println(err)
     }
 
-    log.Printf("time to search: %f ms\n", timeMs);
-    log.Printf("time to get state: %f ms\n", getStateMs);
-    log.Printf("time for first client ops: %f ms\n", client1Ms);
-    log.Printf("time for network/server ops: %f ms\n", networkAndServerMs);
-    log.Printf("time for seconds client ops: %f ms\n", client2Ms);
-
-    /* Clean up */
-    log.Println("Cleaning up...")
-    log.Printf("%f %f %f %f %f\n", getStateMs, client1Ms, networkAndServerMs, client2Ms, timeMs)
+    if (latencyPrints) {
+        log.Printf("time to search: %f ms\n", timeMs);
+        log.Printf("time to get state: %f ms\n", getStateMs);
+        log.Printf("time for first client ops: %f ms\n", client1Ms);
+        log.Printf("time for network/server ops: %f ms\n", networkAndServerMs);
+        log.Printf("time for seconds client ops: %f ms\n", client2Ms);
+        log.Println("Cleaning up...")
+        log.Printf("%f %f %f %f %f\n", getStateMs, client1Ms, networkAndServerMs, client2Ms, timeMs)
+    } else {
+        log.Printf("Completed search in %f ms\n", timeMs);
+    }
     client.CloseConnection(conn)
     client.Cleanup()
 }
@@ -208,7 +263,7 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
     outFile := client.Setup(configFile, bloomFilterSz, numDocs)
     conn := client.OpenConnection()
 
-    log.Println("did setup")
+    log.Println("Completed setup.")
 
     ctr := 0
     start := time.Now()
@@ -246,7 +301,7 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
         log.Println(err)
     }
 
-    log.Printf("avg update time: %s ms\n", strconv.FormatFloat(elapsed, 'f', 3, 64))
+    log.Printf("Average update time: %s ms\n", strconv.FormatFloat(elapsed, 'f', 3, 64))
     log.Printf("%s\n", strconv.FormatFloat(elapsed, 'f', 3, 64))
 
     /* Clean up */
@@ -290,7 +345,6 @@ func runThroughputClustersBenchmark(configFile string, numDocs int, bloomFilterS
                         totals[index] = j - (index * slice)
                         return
                     }
-                    log.Println("channel but not ok???")
                 default:
                     if (updateCtr < numUpdates) {
                         client.DummyUpdateDoc_malicious(conn, []string{"hello", "world"}, (j % numDocs), useMaster)
@@ -422,6 +476,7 @@ func main() {
     runTests := flag.Bool("test", false, "should run correctness tests")
     numDocs := flag.Int("num_docs", 0, "number of docs for artificial benchmark")
     benchmarkDir := flag.String("bench_dir", "", "directory containing files to benchmark")
+    updateBench := flag.Bool("update_bench", false, "run update bnehcmarks")
     bloomFilterSz := flag.Int("bf_sz", 128, "bloom filter size in bits")
     isMalicious := flag.Bool("malicious", true, "run with malicious checks")
     fastSetup := flag.Bool("fast_setup", true, "run fast setup (ONLY TESTING)")
@@ -433,9 +488,10 @@ func main() {
     numSearches := flag.Int("num_searches", 5, "number of searches before updates")
     numClusters := flag.Int("num_clusters", 0, "number of searches before updates")
     onlySetup := flag.Bool("only_setup", false, "only setup")
+    latencyPrints := flag.Bool("latency_prints", false, "print out extra latency information")
+    latencyBench := flag.Bool("latency_bench", false, "run latency benchmarks")
     flag.Parse()
 
-    log.Println(*runTests)
     if (*runTests) {
         correctnessTests(*filename, *bloomFilterSz, *numDocs, *isMalicious, *useMaster)
     } else if (*onlySetup) {
@@ -447,9 +503,11 @@ func main() {
 
     } else if (*numClusters > 0) {
         runParallelBenchmark(*filename, *numDocs, *bloomFilterSz, *useMaster, *numClusters)
-    }else if (*benchmarkDir != "") {
+    }else if (*updateBench) {
         runDirBenchmark(*filename, *benchmarkDir, *bloomFilterSz, *numDocs, *isMalicious, *useMaster)
+    } else if (*latencyBench) {
+        runArtificialBenchmark(*filename, *numDocs, *bloomFilterSz, *isMalicious, *fastSetup, *useMaster, *latencyPrints)
     } else {
-        runArtificialBenchmark(*filename, *numDocs, *bloomFilterSz, *isMalicious, *fastSetup, *useMaster)
+        runInteractiveSearches(*filename, *numDocs, *bloomFilterSz, *isMalicious, *useMaster, *benchmarkDir)
     }
 }

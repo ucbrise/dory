@@ -1,9 +1,7 @@
-source CONFIG.mine
-
-bench_dir=""
+bench_dir="sample_docs"
 correct="false"
 bf_sz="1120"
-num_docs="1024"
+num_docs="128"
 malicious="true"
 fast_setup="true"
 use_master="true"
@@ -14,8 +12,11 @@ num_updates="5"
 num_searches="5"
 num_clusters="0"
 only_setup="false"
+latency_prints="false"
+latency_bench="false"
+update_bench="false"
 
-while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:" opt; do
+while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:l:a:u:" opt; do
     case "$opt" in
         h|\?)
             echo -e "\nArguments: "
@@ -33,6 +34,9 @@ while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:" opt; do
             echo -e "-q \t\t Number of consecutive updates in throughput tests (default 5)"
             echo -e "-r \t\t Number of consecutive searches in throughput tests (default 5)"
             echo -e "-d \t\t Input directory for generating updates for benchmarks\n"
+            echo -e "-l \t\t Print latency breakdown (only for some options)\n"
+            echo -e "-a \t\t Run search latency benchmark\n"
+            echo -e "-u \t\t Run update latency benchmark\n"
             exit 0
             ;;
         d)
@@ -78,10 +82,19 @@ while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:" opt; do
         z) only_setup=$OPTARG
             ;;
 
+        l) latency_prints=$OPTARG
+            ;;
+
+        a) latency_bench=$OPTARG
+            ;;
+
+        u) update_bench=$OPTARG
+            ;;
+
     esac
 done
 
 echo "bench_dir='$bench_dir', tests='$correct', bf_sz='$bf_sz', num_docs='$num_docs'"
 
-CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/bench/client.go --config=src/config/client.config --test="$correct" --bench_dir="$bench_dir" --bf_sz="$bf_sz" --num_docs="$num_docs" --malicious="$malicious" --fast_setup="$fast_setup" --use_master="$use_master" --throughput="$throughput" --throughput_sec="$throughput_sec" --throughput_threads="$throughput_threads" --num_updates="$num_updates" --num_searches="$num_searches" --num_clusters="$num_clusters" --only_setup="$only_setup"
+CGO_CFLAGS="-I./libsolv-sys/src -D LIBSOLV_INTERNAL -w" CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/bench/client.go --config=src/config/client.config --test="$correct" --bench_dir="$bench_dir" --bf_sz="$bf_sz" --num_docs="$num_docs" --malicious="$malicious" --fast_setup="$fast_setup" --use_master="$use_master" --throughput="$throughput" --throughput_sec="$throughput_sec" --throughput_threads="$throughput_threads" --num_updates="$num_updates" --num_searches="$num_searches" --num_clusters="$num_clusters" --only_setup="$only_setup" --latency_prints="$latency_prints" --latency_bench="$latency_bench" --update_bench="$update_bench"
 

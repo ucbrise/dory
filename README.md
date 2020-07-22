@@ -7,9 +7,9 @@ DORY is an encrypted search system that splits trust between multiple servers in
 This prototype is released under the Apache v2 license (see [License](#license)).
 
 ## Setup
-1. Install OpenSSL.
+1. Install OpenSSL, tested up to 2.6.5.
 2. Run `go get github.com/hashicorp/go-msgpack/codec`.
-3. Download and build `libstemmer` (http://snowball.tartarus.org/download.html).
+3. Download and build `libstemmer` (http://snowball.tartarus.org/download.html), tested up to version 2.0.0.
 4. Move the output `libstemmer.o` to `src/c/`.
 
 ## Configuration
@@ -25,6 +25,8 @@ For example, to start test DORY on a single machine (with two servers), use the 
 ./runServer.sh -s 2
 ./runClient.sh
 ```
+
+Without any flags set, the client will load all the documents in `sample_docs` into the search index and then provide prompts for the user to enter keywords to search for.
 
 Make sure to always set the Bloom filter size and the max number of documents the same across the master, servers, and clients. The only exception is when running with cluster sizes greater than 1; in this case, every entity should use the same Bloom filter size, the master and client should use the correct maximum number of documents, and the servers should use the maximum  number of documents divided by the number of clusters. To run with multiple clusters, you will need a number of servers equal to 2 times the number of clusters.
 

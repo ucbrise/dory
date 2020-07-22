@@ -6,8 +6,19 @@
 struct sb_stemmer *stemmer;
 
 void initStemmer() {
-    printf("init stemmer\n");
     stemmer = sb_stemmer_new("english", "UTF_8");
+}
+
+char *stemWord (char *keywordIn) {
+    char *tmp = malloc(strlen(keywordIn));
+    strcpy(tmp, keywordIn);
+    for (int i = 0; i < strlen(keywordIn); i++) {
+        if (isupper(keywordIn[i])) tmp[i] = tolower(keywordIn[i]);
+    }
+    const sb_symbol *stemmed = sb_stemmer_stem(stemmer, tmp, strlen(tmp));
+    char *keywordOut = malloc(strlen((const char *)stemmed));
+    strcpy(keywordOut, (const char *)stemmed);
+    return keywordOut;
 }
 
 /* Tokenize an array of lines into keywords (maximum number of keywords). */

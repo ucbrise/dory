@@ -1,6 +1,4 @@
-source CONFIG.mine
-
-max_docs="1024"
+max_docs="128"
 bf_sz="1120"
 malicious="true"
 tick_ms="1000"
@@ -33,4 +31,4 @@ done
 echo "bench_dir='$bench_dir', bf_sz='$bf_sz', max_docs='$max_docs', malicious='$malicious'"
 
 
-CGO_LDFLAGS="-lssl -lcrypto -lm -lpthread "$PWD"/src/c/libstemmer.o" go run src/master/master.go --config=src/config/master.config --bf_sz="$bf_sz" --max_docs="$max_docs" --malicious="$malicious" --tick_ms="$tick_ms"
+CGO_CFLAGS="-I./libsolv-sys/src -D LIBSOLV_INTERNAL -w" CGO_LDFLAGS="-lssl -lcrypto -lm -lpthread "$PWD"/src/c/libstemmer.o" go run src/master/master.go --config=src/config/master.config --bf_sz="$bf_sz" --max_docs="$max_docs" --malicious="$malicious" --tick_ms="$tick_ms"

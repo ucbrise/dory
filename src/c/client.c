@@ -1,6 +1,7 @@
 #include "client.h"
 #include "common.h"
 #include "dpf.h"
+#include "tokenize.h"
 #include <openssl/rand.h>
 #include <openssl/evp.h>
 #include <string.h>
@@ -45,10 +46,6 @@ int initializeClient(client *c, int numThreads, uint8_t *maskKey, uint8_t *macKe
         memcpy(c->macKey1, macKey1, 16);
         CHECK_C (EVP_EncryptInit_ex(c->macKey1_ctx, EVP_aes_128_ecb(),  NULL, c->macKey1, NULL));
     }
-
-    printBuffer("maskKey", c->maskKey, 16);
-    printBuffer("macKey", c->macKey1, 16);
-
 
 cleanup:
     if (rv == ERROR) freeClient(c);
@@ -224,7 +221,8 @@ cleanup:
 int generateKeywordQuery(client *c, char *keyword, unsigned char *keys_s1[], unsigned char *keys_s2[], uint32_t *indexes) {
     int rv;
     uint8_t *data;
-    CHECK_C (getIndexesForKeyword(c, indexes, keyword));
+    char *stemmedKeyword = stemWord(keyword);
+    CHECK_C (getIndexesForKeyword(c, indexes, stemmedKeyword));
 
     CHECK_A (data = malloc(NUM_DOCS_BYTES));
     memset(data, 0xff, NUM_DOCS_BYTES);
@@ -241,7 +239,8 @@ cleanup:
 int generateKeywordQuery_malicious(client *c, char *keyword, unsigned char *keys_s1[], unsigned char *keys_s2[], uint32_t *indexes) {
     int rv;
     uint8_t *data;
-    CHECK_C (getIndexesForKeyword(c, indexes, keyword));
+    char *stemmedKeyword = stemWord(keyword);
+    CHECK_C (getIndexesForKeyword(c, indexes, stemmedKeyword));
 
     CHECK_A (data = malloc(MALICIOUS_DPF_LEN));
     memset(data, 0xff, MALICIOUS_DPF_LEN);

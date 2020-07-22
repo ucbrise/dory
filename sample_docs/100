@@ -1,0 +1,135 @@
+Message-ID: <7452188.1075855667684.JavaMail.evans@thyme>
+Date: Mon, 9 Oct 2000 07:16:00 -0700 (PDT)
+From: phillip.allen@enron.com
+To: keith.holst@enron.com
+Subject: Consolidated positions: Issues & To Do list
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+X-From: Phillip K Allen
+X-To: Keith Holst
+X-cc: 
+X-bcc: 
+X-Folder: \Phillip_Allen_Dec2000\Notes Folders\All documents
+X-Origin: Allen-P
+X-FileName: pallen.nsf
+
+---------------------- Forwarded by Phillip K Allen/HOU/ECT on 10/09/2000 
+02:16 PM ---------------------------
+
+
+Richard Burchfield
+10/06/2000 06:59 AM
+To: Phillip K Allen/HOU/ECT@ECT
+cc: Beth Perlman/HOU/ECT@ECT 
+Subject: Consolidated positions: Issues & To Do list
+
+Phillip,
+ Below is the issues & to do list as we go forward with documenting the 
+requirements for consolidated physical/financial positions and transport 
+trade capture. What we need to focus on is the first bullet in Allan's list; 
+the need for a single set of requirements. Although the meeting with Keith, 
+on Wednesday,  was informative the solution of creating a infinitely dynamic 
+consolidated position screen, will be extremely difficult and time 
+consuming.  Throughout the meeting on Wednesday, Keith alluded to the 
+inability to get consensus amongst the traders on the presentation of the 
+consolidated position, so the solution was to make it so that a trader can 
+arrange the position screen to their liking (much like Excel). What needs to 
+happen on Monday from 3 - 5 is a effort to design a desired layout for the 
+consolidated position screen, this is critical. This does not exclude 
+building a capability to create a more flexible position presentation for the 
+future, but in order to create a plan that can be measured we need firm 
+requirements. Also, to reiterate that the goals of this project is a project 
+plan on consolidate physical/financial positions and transport trade capture. 
+The other issues that have been raised will be capture as projects on to 
+themselves, and will need to be prioritised as efforts outside of this 
+project.
+
+I have been involved in most of the meetings and the discussions have been 
+good. I believe there has been good communication between the teams, but now 
+we need to have focus on the objectives we set out to solve.
+
+Richard  
+---------------------- Forwarded by Richard Burchfield/HOU/ECT on 10/06/2000 
+08:34 AM ---------------------------
+
+
+Allan Severude
+10/05/2000 06:03 PM
+To: Richard Burchfield/HOU/ECT@ECT
+cc: Peggy Alix/HOU/ECT@ECT, Russ Severson/HOU/ECT@ECT, Scott 
+Mills/HOU/ECT@ECT, Kenny Ha/HOU/ECT@ECT 
+Subject: Consolidated positions: Issues & To Do list
+
+
+From our initial set of meetings with the traders regarding consolidated 
+positions, I think we still have the following issues:
+We don't have a single point of contact from the trading group.  We've had 
+three meetings which brought out very different issues from different 
+traders.  We really need a single point of contact to help drive the trader 
+requirements and help come to a consensus regarding the requirements.
+We're getting hit with a lot of different requests, many of which appear to 
+be outside the scope of position consolidation.
+
+Things left to do:
+I think it may be useful to try to formulate a high level project goal to 
+make it as clear as possible what we're trying to accomplish with this 
+project.  It'll help determine which requests fall under the project scope.
+Go through the list of requests to determine which are in scope for this 
+project and which fall out of scope.
+For those in scope, work to define relative importance (priority) of each and 
+work with traders to define the exact requirements of each.
+Define the desired lay out of the position manager screen: main view and all 
+drill downs.
+Use the above to formulate a project plan.
+
+Things requested thus far (no particular order):
+Inclusion of Sitara physical deals into the TDS position manager and deal 
+ticker.
+Customized rows and columns in the position manager (ad hoc rows/columns that 
+add up existing position manager rows/columns).
+New drill down in the position manager to break out positions by: physical, 
+transport, swaps, options, ...
+Addition of a curve tab to the position manager to show the real-time values 
+of all curves on which the desk has a position.
+Ability to split the current position grid to allow daily positions to be 
+shown directly above monthly positions.  Each grouped column in the top grid 
+would be tied to a grouped column in the bottom grid.
+Ability to properly show curve shift for float-for-float deals; determine the 
+appropriate positions to show for each:
+Gas Daily for monthly index,
+Physical gas for Nymex,
+Physical gas for Inside Ferc,
+Physical gas for Mid market.
+Ability for TDS to pull valuation results based on a TDS flag instead of 
+using official valuations.
+Position and P&L aggregation across all gas desks.
+Ability to include the Gas Price book into TDS:
+Inclusion of spread options in our systems.  Ability to handle volatility 
+skew and correlations.
+Ability to revalue all options incrementally throughout the trading day.  
+Approximate delta changes between valuations using instantaneous gamma or a 
+gamma grid.
+Valuation of Gas Daily options.
+A new position screen for options (months x strike x delta).  TBD.
+Inclusion of positions for exotic options currently managed in spreadsheets.
+Ability to isolate the position change due to changed deals in the position 
+manager.
+Ability to view change deal P&L in the TDS deal ticker.  Show new deal terms, 
+prior deal terms, and net P&L affect of the change.
+Eliminate change deals with no economic impact from the TDS deal ticker.
+Position drill down in the position manager to isolate the impact of 
+individual deals on the position total in a grid cell.
+Benchmark positions in TDS.
+Deployment of TDS in Canada. Currency and volume uom conversions. Implicit 
+and explicit position break out issues.
+
+-- Allan.
+
+PS: Colleen is setting up a meeting tomorrow to discuss the direction for 
+transport.  Hopefully we'll know much better where that part stands at that 
+point.
+
+
+
+

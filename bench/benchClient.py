@@ -25,10 +25,10 @@ def generateDorySetupClientLocalStr(numDocs, bloomFilterSz, numClusters):
     return ("./runClient.sh -n %s -b %s -p %s -z true") % (numDocs, bloomFilterSz, numClusters)
 
 def generateDoryLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious, numClusters):
-    return ("./runClient.sh -n %s -b %s -m %s -p %s") % (numDocs, bloomFilterSz, isMalicious, numClusters)
+    return ("./runClient.sh -n %s -b %s -m %s -p %s -l true -a true") % (numDocs, bloomFilterSz, isMalicious, numClusters)
 
 def generateUpdateLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious):
-    return ("./runClient.sh -n %s -b %s -m %s -d ../maildir") % (numDocs, bloomFilterSz, isMalicious)
+    return ("./runClient.sh -n %s -b %s -m %s -d ../maildir -u true") % (numDocs, bloomFilterSz, isMalicious)
 
 def startDoryThroughputServers(master, replicas, bloomFilterSz, numDocs, tickMs):
     processes = []

@@ -26,7 +26,7 @@ For example, to start test DORY on a single machine (with two servers), use the 
 ./runClient.sh
 ```
 
-Without any flags set, the client will load all the documents in `sample_docs` into the search index and then provide prompts for the user to enter keywords to search for.
+Without any flags set, the client will load all the documents in `sample_docs` (a very smal subset of the Enron email dataset) into the search index and then provide prompts for the user to enter keywords to search for.
 
 Make sure to always set the Bloom filter size and the max number of documents the same across the master, servers, and clients. The only exception is when running with cluster sizes greater than 1; in this case, every entity should use the same Bloom filter size, the master and client should use the correct maximum number of documents, and the servers should use the maximum  number of documents divided by the number of clusters. To run with multiple clusters, you will need a number of servers equal to 2 times the number of clusters.
 

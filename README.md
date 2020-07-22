@@ -7,7 +7,7 @@ DORY is an encrypted search system that splits trust between multiple servers in
 This prototype is released under the Apache v2 license (see [License](#license)).
 
 ## Setup
-1. Install OpenSSL, tested up to 2.6.5.
+1. Install OpenSSL, tested up to version 2.6.5.
 2. Run `go get github.com/hashicorp/go-msgpack/codec`.
 3. Download and build `libstemmer` (http://snowball.tartarus.org/download.html), tested up to version 2.0.0.
 4. Move the output `libstemmer.o` to `src/c/`.

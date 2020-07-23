@@ -1,6 +1,6 @@
 bench_dir="sample_docs"
 correct="false"
-bf_sz="1120"
+bf_sz="1024"
 num_docs="128"
 malicious="true"
 fast_setup="true"

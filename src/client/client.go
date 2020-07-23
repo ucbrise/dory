@@ -60,7 +60,7 @@ func logLatency (latency time.Duration, tag string) {
 /* Run update (malicious adversaries). */
 func UpdateDoc_malicious(conn *common.Conn, keywords []string, docID int, useMaster bool) error {
     /* Convert []string to **char */
-    cKeywords := C.malloc(C.size_t(len(keywords)) * C.size_t(common.MAX_KEYWORD_SIZE))
+    cKeywords := C.malloc(C.size_t(len(keywords)) * C.size_t(unsafe.Sizeof(&docID)))
     cKeywordsIndexable := (*[1<<30 - 1]*C.char)(cKeywords)
     for i, keyword := range keywords {
         cKeywordsIndexable[i] = C.CString(keyword)
@@ -304,8 +304,12 @@ func DummyUpdateDoc_semihonest(conn *common.Conn, keywords []string, docID int, 
     return nil
 }
 
-/* Update document, tokenizing words from file (malicious adveraries). */
-func UpdateDocFile_malicious(conn *common.Conn, filename string, docID int, useMaster bool) error {
+func StemWord(keyword string) string {
+    cKeyword := C.CString(keyword)
+    return C.GoString(C.stemWord(cKeyword))
+}
+
+func GetKeywordsFromFile(filename string) []string {
     cFilename := C.CString(filename)
     cKeywords := (**C.char)(C.malloc(C.MAX_NUM_KEYWORDS * C.size_t(unsafe.Sizeof(&filename))))
     cKeywordsIndexable := (*[1<<30 - 1]*C.char)(unsafe.Pointer(cKeywords))
@@ -315,23 +319,18 @@ func UpdateDocFile_malicious(conn *common.Conn, filename string, docID int, useM
     for i := 0; i < int(numKeywords); i++ {
         keywords[i] = C.GoString(cKeywordsIndexable[i])
     }
+    return keywords
+}
 
-    log.Println(keywords)
+/* Update document, tokenizing words from file (malicious adveraries). */
+func UpdateDocFile_malicious(conn *common.Conn, filename string, docID int, useMaster bool) error {
+    keywords := GetKeywordsFromFile(filename)
     return UpdateDoc_malicious(conn, keywords, docID, useMaster)
 }
 
 /* Update document, tokenizing words from file (semihonest adveraries). */
 func UpdateDocFile_semihonest(conn *common.Conn, filename string, docID int, useMaster bool) error {
-    cFilename := C.CString(filename)
-    cKeywords := (**C.char)(C.malloc(C.MAX_NUM_KEYWORDS * C.size_t(unsafe.Sizeof(&filename))))
-    cKeywordsIndexable := (*[1<<30 - 1]*C.char)(unsafe.Pointer(cKeywords))
-    numKeywords := C.tokenizeFile(cKeywords, cFilename)
-
-    keywords := make([]string, numKeywords)
-    for i := 0; i < int(numKeywords); i++ {
-        keywords[i] = C.GoString(cKeywordsIndexable[i])
-    }
-    
+    keywords := GetKeywordsFromFile(filename)
     return UpdateDoc_semihonest(conn, keywords, docID, useMaster)
 }
 

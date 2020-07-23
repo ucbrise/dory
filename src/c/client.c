@@ -221,8 +221,7 @@ cleanup:
 int generateKeywordQuery(client *c, char *keyword, unsigned char *keys_s1[], unsigned char *keys_s2[], uint32_t *indexes) {
     int rv;
     uint8_t *data;
-    char *stemmedKeyword = stemWord(keyword);
-    CHECK_C (getIndexesForKeyword(c, indexes, stemmedKeyword));
+    CHECK_C (getIndexesForKeyword(c, indexes, keyword));
 
     CHECK_A (data = malloc(NUM_DOCS_BYTES));
     memset(data, 0xff, NUM_DOCS_BYTES);
@@ -239,8 +238,7 @@ cleanup:
 int generateKeywordQuery_malicious(client *c, char *keyword, unsigned char *keys_s1[], unsigned char *keys_s2[], uint32_t *indexes) {
     int rv;
     uint8_t *data;
-    char *stemmedKeyword = stemWord(keyword);
-    CHECK_C (getIndexesForKeyword(c, indexes, stemmedKeyword));
+    CHECK_C (getIndexesForKeyword(c, indexes, keyword));
 
     CHECK_A (data = malloc(MALICIOUS_DPF_LEN));
     memset(data, 0xff, MALICIOUS_DPF_LEN);

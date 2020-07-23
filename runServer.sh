@@ -1,5 +1,5 @@
 max_docs="128"
-bf_sz="1120"
+bf_sz="1024"
 correct="false"
 
 while getopts ":h?:d:n:t:b:s:c:" opt; do

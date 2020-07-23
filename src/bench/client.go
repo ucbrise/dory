@@ -16,47 +16,54 @@ import (
 )
 
 /* Run correctness tests. */
-func correctnessTests(configFile string, bloomFilterSz int, numDocs int, isMalicious bool, useMaster bool) {
+func correctnessTests(configFile string, bloomFilterSz int, numDocs int, isMalicious bool, useMaster bool, inputDir string) {
     /* Initialize client */
     log.Println("Initializing client...")
     client.Setup(configFile, bloomFilterSz, numDocs)
-
-    log.Println("bloom filter sz: ", bloomFilterSz, ", num docs: ", numDocs)
-    keywords := []string{"hello", "world"}
     conn := client.OpenConnection()
-    for i := 0; i < numDocs; i++ {
-        if (isMalicious) {
-            client.UpdateDoc_malicious(conn, keywords, i, useMaster)
-        } else {
-            client.UpdateDoc_semihonest(conn, keywords, i, useMaster)
-        }
-    }
-    time.Sleep(2000 * time.Millisecond)
 
-    log.Println("Searching for 'hello'")
-    var err error
-    var results []byte
-    if (isMalicious) {
-        results, err, _, _, _, _ = client.SearchKeyword_malicious(conn, "hello", useMaster)
-    } else {
-        results, err = client.SearchKeyword_semihonest(conn, "hello", useMaster)
-    }
-    if err != nil {
-        log.Fatalln(err)
-    }
-    passed := true
-    for i := 0; i < len(results); i++ {
-        if (results[i] != 0xff) {
-            passed = false
-        }
-    }
-    log.Println("results: ", results)
-    if (passed) {
-        log.Println("----- PASSED TEST -----")
-    } else {
-        log.Println("----- FAILED TEST -----")
+    files,_ := ioutil.ReadDir(inputDir)
+    numDocs = len(files)
+    for docID, file := range files {
+            var err error
+            docID = docID % numDocs
+            filename := inputDir + "/" + file.Name()
+            if (isMalicious) {
+                err = client.UpdateDocFile_malicious(conn, filename, docID, useMaster)
+            } else {
+                err = client.UpdateDocFile_semihonest(conn, filename, docID, useMaster)
+            }
+            if err != nil {
+                log.Fatal(err)
+            }
     }
 
+
+    log.Println("Finished updates")
+
+    time.Sleep(5000 * time.Millisecond)
+    
+    pass := true
+    for docID, file := range files {
+        keywords := client.GetKeywordsFromFile(inputDir + "/" + file.Name())
+        for _, keyword := range keywords {
+            var docs []byte
+            if (isMalicious) {
+                docs, _, _, _, _, _  = client.SearchKeyword_malicious(conn, keyword, useMaster)
+            } else {
+                docs, _ = client.SearchKeyword_semihonest(conn, keyword, useMaster)
+            }
+            if (docs[docID / 8] & (1 << (uint(docID) % 8)) == 0) {
+                log.Printf("ERROR: did not find keyword %s in document %d\n", keyword, docID)
+                pass = false
+            }
+        }
+    }
+    if (pass) {
+        log.Printf("---- PASSED TESTS ----\n");
+    } else {
+        log.Printf("---- FAILED TESTS ----\n");
+    }
 
     /* Clean up */
     log.Println("Cleaning up...")
@@ -139,7 +146,7 @@ func runInteractiveSearches(configFile string, numDocs int, bloomFilterSz int, i
 
     for input.Scan() {
         var docs []byte
-        keyword := input.Text()
+        keyword := client.StemWord(input.Text())
         if (isMalicious) {
             docs, _, _, _, _, _  = client.SearchKeyword_malicious(conn, keyword, useMaster)
         } else {
@@ -492,8 +499,12 @@ func main() {
     latencyBench := flag.Bool("latency_bench", false, "run latency benchmarks")
     flag.Parse()
 
+    if (!*runTests) {
+        log.Println("no run tests")
+    }
     if (*runTests) {
-        correctnessTests(*filename, *bloomFilterSz, *numDocs, *isMalicious, *useMaster)
+        log.Println("going to run correctness tests")
+        correctnessTests(*filename, *bloomFilterSz, *numDocs, *isMalicious, *useMaster, *benchmarkDir)
     } else if (*onlySetup) {
         runFastSetup(*filename, *numDocs, *bloomFilterSz, *useMaster, *numClusters)
     }else if (*runThroughput && *numClusters == 0) {

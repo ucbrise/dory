@@ -1,5 +1,5 @@
 max_docs="128"
-bf_sz="1120"
+bf_sz="1024"
 malicious="true"
 tick_ms="1000"
 

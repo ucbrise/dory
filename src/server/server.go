@@ -9,6 +9,8 @@ package main
 #include "../c/server.h"
 #include "../c/client.c"
 #include "../c/client.h"
+#include "../c/tokenize.c"
+#include "../c/tokenize.h"
 */
 import "C"
 import (

@@ -334,7 +334,7 @@ func UpdateDocFile_semihonest(conn *common.Conn, filename string, docID int, use
     return UpdateDoc_semihonest(conn, keywords, docID, useMaster)
 }
 
-func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) ([]byte, error, time.Duration, time.Duration, time.Duration, time.Duration) {
+func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) ([]byte, error, time.Duration, time.Duration, time.Duration, time.Duration, time.Duration) {
     t1 := time.Now()
 
     if (useMaster) {
@@ -385,6 +385,8 @@ func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) 
     var wg sync.WaitGroup
     wg.Add(2)
 
+    var serverLatency time.Duration
+
     resp1 := &common.SearchResponse_malicious{}
     var respError1 error
     go func() {
@@ -396,6 +398,9 @@ func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) 
             resp1,
             &respError1,
         )
+        if (resp1.ServerLatency > serverLatency) {
+            serverLatency = resp1.ServerLatency
+        }
     }()
 
     resp2 := &common.SearchResponse_malicious{}
@@ -409,6 +414,9 @@ func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) 
             resp2,
             &respError2,
         )
+        if (resp2.ServerLatency > serverLatency) {
+            serverLatency = resp2.ServerLatency
+        }
     }()
   
     wg.Wait()
@@ -436,7 +444,7 @@ func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) 
 
     t5 := time.Now()
 
-    return docsPresent, nil, t2.Sub(t1), t3.Sub(t2), t4.Sub(t3), t5.Sub(t4)
+    return docsPresent, nil, t2.Sub(t1), t3.Sub(t2), t4.Sub(t3), serverLatency, t5.Sub(t4)
 }
 
 /* Run search, possibly distributed across clusters (malicious adversaries). */

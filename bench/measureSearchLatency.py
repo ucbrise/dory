@@ -22,12 +22,21 @@ for i in range(11):
     print(("Number of docs = %d, bloom filter size = %d") % (numDocs, bloomFilterSzList[i]))
     latencies = runDoryLatencyTest(master, replicas, clients[0], bloomFilterSzList[i], numDocs, 10000, isMalicious, 0)
     print("-------------------------")
-    print(latencies[len(latencies) - 1])
+    f.write(("Number of docs = %d, bloom filter size = %d\n") % (numDocs, bloomFilterSzList[i]))
     if not breakdown: 
+        print(("Time: %d ms") % latencies[0])
         f.write(str(latencies[len(latencies) - 1]) + "\n")
     else:
-        for latency in latencies: 
-            f.write(str(latency) + " ")
-        f.write("\n")
-
+        print(("Total time: %d ms") % (latencies[0]))
+        print(("-> Consensus time: %d ms") % (latencies[1]))
+        print(("-> Client time: %d ms") % (latencies[2]))
+        print(("-> Network time: %d ms") % (latencies[3]))
+        print(("-> Server time: %d ms") % (latencies[4]))
+        
+        f.write(("Total time: %d ms\n") % (latencies[0]))
+        f.write(("-> Consensus time: %d ms\n") % (latencies[1]))
+        f.write(("-> Client time: %d ms\n") % (latencies[2]))
+        f.write(("-> Network time: %d ms\n") % (latencies[3]))
+        f.write(("-> Server time: %d ms\n") % (latencies[4]))
+ 
 f.close()

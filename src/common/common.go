@@ -1,5 +1,9 @@
 package common
 
+import (
+    "time"
+)
+
 const MAX_KEYWORD_SIZE = 32
 
 type MasterConfig struct {
@@ -60,11 +64,13 @@ type SearchRequest_semihonest struct {
 }
 
 type SearchResponse_malicious struct {
-    Results     [][]byte
+    Results         [][]byte
+    ServerLatency   time.Duration
 }
 
 type SearchResponse_semihonest struct {
-    Results     [][]byte
+    Results         [][]byte
+    ServerLatency   time.Duration
 }
 
 type UpdateRequest_malicious struct {

@@ -49,7 +49,7 @@ void printServer(server *s) {
         printBuffer("", s->indexList[i], MAX_DOCS_BYTES);
     }
     for (int i = 0; i < BLOOM_FILTER_SZ; i++) {
-        printf("BN sum %d: %x\n", i, s->macSums[i]);
+        printf("aggregate MAC %d: %x\n", i, s->macSums[i]);
     }
 }
 
@@ -78,7 +78,9 @@ int setRow_malicious(server *s, int i, uint8_t *bf, uint128_t *macs) {
     int rv;
     setRow(s, i, bf);
     for (int j = 0; j < BLOOM_FILTER_SZ; j++) {
-        s->macSums[j] = s->macSums[j] ^ macs[j];
+        if (s->macSums[j] != macs[j]) {
+            s->macSums[j] = s->macSums[j] ^ macs[j];
+        }
     }
 cleanup:
     return rv;

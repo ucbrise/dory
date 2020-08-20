@@ -49,7 +49,7 @@ func correctnessTests(configFile string, bloomFilterSz int, numDocs int, isMalic
         for _, keyword := range keywords {
             var docs []byte
             if (isMalicious) {
-                docs, _, _, _, _, _  = client.SearchKeyword_malicious(conn, keyword, useMaster)
+                docs, _, _, _, _, _, _  = client.SearchKeyword_malicious(conn, keyword, useMaster)
             } else {
                 docs, _ = client.SearchKeyword_semihonest(conn, keyword, useMaster)
             }
@@ -148,7 +148,7 @@ func runInteractiveSearches(configFile string, numDocs int, bloomFilterSz int, i
         var docs []byte
         keyword := client.StemWord(input.Text())
         if (isMalicious) {
-            docs, _, _, _, _, _  = client.SearchKeyword_malicious(conn, keyword, useMaster)
+            docs, _, _, _, _, _, _  = client.SearchKeyword_malicious(conn, keyword, useMaster)
         } else {
             docs, _ = client.SearchKeyword_semihonest(conn, keyword, useMaster)
         }
@@ -198,24 +198,24 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
     var err error
     start := time.Now()
     getStateMs := 0.0
-    client1Ms := 0.0
-    networkAndServerMs := 0.0
-    client2Ms := 0.0
+    clientMs := 0.0
+    networkMs := 0.0
+    serverMs := 0.0
     for i := 0; i < numTrials; i++ {
         if (isMalicious) {
-            _, _, t1, t2, t3, t4  := client.SearchKeyword_malicious(conn, "hello", useMaster)
+            _, _, t1, t2, t3, t4, t5  := client.SearchKeyword_malicious(conn, "hello", useMaster)
             getStateMs += float64(t1.Nanoseconds())/float64(1e6)
-            client1Ms += float64(t2.Nanoseconds())/float64(1e6)
-            networkAndServerMs += float64(t3.Nanoseconds())/float64(1e6)
-            client2Ms += float64(t4.Nanoseconds())/float64(1e6)
+            serverMs += float64(t4.Nanoseconds())/float64(1e6)
+            clientMs += float64(t2.Nanoseconds())/float64(1e6) + float64(t5.Nanoseconds())/float64(1e6)
+            networkMs = float64(t3.Nanoseconds())/float64(1e6) - serverMs
         } else {
             _, err = client.SearchKeyword_semihonest(conn, "hello", useMaster)
         }
     }
     getStateMs = getStateMs/float64(numTrials)
-    client1Ms = client1Ms/float64(numTrials)
-    networkAndServerMs = networkAndServerMs/float64(numTrials)
-    client2Ms = client2Ms/float64(numTrials)
+    clientMs = clientMs/float64(numTrials)
+    networkMs = networkMs/float64(numTrials)
+    serverMs = serverMs/float64(numTrials)
 
     elapsed := time.Since(start)
     if err != nil {
@@ -236,21 +236,21 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
     timeMs := float64(elapsed.Nanoseconds())/float64(1e6)/float64(numTrials)
     _, err = io.WriteString(file, strconv.FormatFloat(timeMs, 'f', 3, 64))
     _, err = io.WriteString(file, strconv.FormatFloat(getStateMs, 'f', 3, 64))
-    _, err = io.WriteString(file, strconv.FormatFloat(client1Ms, 'f', 3, 64))
-    _, err = io.WriteString(file, strconv.FormatFloat(networkAndServerMs, 'f', 3, 64))
-    _, err = io.WriteString(file, strconv.FormatFloat(client2Ms, 'f', 3, 64))
+    _, err = io.WriteString(file, strconv.FormatFloat(clientMs, 'f', 3, 64))
+    _, err = io.WriteString(file, strconv.FormatFloat(networkMs, 'f', 3, 64))
+    _, err = io.WriteString(file, strconv.FormatFloat(serverMs, 'f', 3, 64))
     if err != nil {
         log.Println(err)
     }
 
     if (latencyPrints) {
-        log.Printf("time to search: %f ms\n", timeMs);
-        log.Printf("time to get state: %f ms\n", getStateMs);
-        log.Printf("time for first client ops: %f ms\n", client1Ms);
-        log.Printf("time for network/server ops: %f ms\n", networkAndServerMs);
-        log.Printf("time for seconds client ops: %f ms\n", client2Ms);
+        log.Printf("total time to search: %f ms\n", timeMs);
+        log.Printf("-> consensus: %f ms\n", getStateMs);
+        log.Printf("-> client: %f ms\n", clientMs);
+        log.Printf("-> network: %f ms\n", networkMs);
+        log.Printf("-> server: %f ms\n", serverMs);
         log.Println("Cleaning up...")
-        log.Printf("%f %f %f %f %f\n", getStateMs, client1Ms, networkAndServerMs, client2Ms, timeMs)
+        log.Printf("%f %f %f %f %f\n", getStateMs, clientMs, networkMs, serverMs, timeMs)
     } else {
         log.Printf("Completed search in %f ms\n", timeMs);
     }
@@ -499,9 +499,6 @@ func main() {
     latencyBench := flag.Bool("latency_bench", false, "run latency benchmarks")
     flag.Parse()
 
-    if (!*runTests) {
-        log.Println("no run tests")
-    }
     if (*runTests) {
         log.Println("going to run correctness tests")
         correctnessTests(*filename, *bloomFilterSz, *numDocs, *isMalicious, *useMaster, *benchmarkDir)

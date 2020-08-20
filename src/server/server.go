@@ -89,6 +89,7 @@ func handleConnection(conn net.Conn) {
             start := time.Now()
             resp, respErr := searchKeyword_malicious(req)
             elapsed := time.Since(start)
+            resp.ServerLatency = elapsed
             logLatency(elapsed, "malicious")
             if err := enc.Encode(&respErr); err != nil {
                 log.Fatalln(err)
@@ -109,6 +110,7 @@ func handleConnection(conn net.Conn) {
             start := time.Now()
             resp, respErr := searchKeyword_semihonest(req)
             elapsed := time.Since(start)
+            resp.ServerLatency = elapsed
             logLatency(elapsed, "semihonest")
             if err := enc.Encode(&respErr); err != nil {
                 log.Fatalln(err)

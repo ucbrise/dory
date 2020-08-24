@@ -682,7 +682,7 @@ func RunFastSetup(benchmarkDir string, useMaster bool) error {
     go func() {
         defer wg.Done()
         common.SendMessage(
-            config.Addr[0] + config.Port[1],
+            config.Addr[1] + config.Port[1],
             common.SETUP_REQUEST,
             req2,
             resp2,

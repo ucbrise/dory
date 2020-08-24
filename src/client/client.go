@@ -114,7 +114,7 @@ func UpdateDoc_malicious(conn *common.Conn, keywords []string, docID int, useMas
         go func() {
             defer wg.Done()
             common.SendMessageNoResp(
-                config.Addr1 + config.Port1,
+                config.Addr[0] + config.Port[0],
                 common.UPDATE_REQUEST_MALICIOUS,
                 req,
             )
@@ -124,7 +124,7 @@ func UpdateDoc_malicious(conn *common.Conn, keywords []string, docID int, useMas
         go func() {
             defer wg.Done()
             common.SendMessageNoResp(
-                config.Addr2 + config.Port2,
+                config.Addr[1] + config.Port[1],
                 common.UPDATE_REQUEST_MALICIOUS,
                 req,
             )
@@ -170,7 +170,7 @@ func DummyUpdateDoc_malicious(conn *common.Conn, keywords []string, docID int, u
         go func() {
             defer wg.Done()
             common.SendMessageNoResp(
-                config.Addr1 + config.Port1,
+                config.Addr[0] + config.Port[0],
                 common.UPDATE_REQUEST_MALICIOUS,
                 req,
             )
@@ -180,7 +180,7 @@ func DummyUpdateDoc_malicious(conn *common.Conn, keywords []string, docID int, u
         go func() {
             defer wg.Done()
             common.SendMessageNoResp(
-                config.Addr2 + config.Port2,
+                config.Addr[1] + config.Port[1],
                 common.UPDATE_REQUEST_MALICIOUS,
                 req,
             )
@@ -233,7 +233,7 @@ func UpdateDoc_semihonest(conn *common.Conn, keywords []string, docID int, useMa
         go func() {
             defer wg.Done()
             common.SendMessageNoResp(
-                config.Addr1 + config.Port1,
+                config.Addr[0] + config.Port[0],
                 common.UPDATE_REQUEST_SEMIHONEST,
                 req,
             )
@@ -243,7 +243,7 @@ func UpdateDoc_semihonest(conn *common.Conn, keywords []string, docID int, useMa
         go func() {
             defer wg.Done()
             common.SendMessageNoResp(
-                config.Addr2 + config.Port2,
+                config.Addr[1] + config.Port[1],
                 common.UPDATE_REQUEST_SEMIHONEST,
                 req,
             )
@@ -281,7 +281,7 @@ func DummyUpdateDoc_semihonest(conn *common.Conn, keywords []string, docID int, 
         go func() {
             defer wg.Done()
             common.SendMessageNoResp(
-                config.Addr1 + config.Port1,
+                config.Addr[0] + config.Port[0],
                 common.UPDATE_REQUEST_SEMIHONEST,
                 req,
             )
@@ -291,7 +291,7 @@ func DummyUpdateDoc_semihonest(conn *common.Conn, keywords []string, docID int, 
         go func() {
             defer wg.Done()
             common.SendMessageNoResp(
-                config.Addr2 + config.Port2,
+                config.Addr[1] + config.Port[1],
                 common.UPDATE_REQUEST_SEMIHONEST,
                 req,
             )
@@ -392,7 +392,7 @@ func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) 
     go func() {
         defer wg.Done()
         common.SendMessage(
-            config.Addr1 + config.Port1,
+            config.Addr[0] + config.Port[0],
             common.SEARCH_REQUEST_MALICIOUS,
             req1,
             resp1,
@@ -408,7 +408,7 @@ func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) 
     go func() {
         defer wg.Done()
         common.SendMessage(
-            config.Addr2 + config.Port2,
+            config.Addr[1] + config.Port[1],
             common.SEARCH_REQUEST_MALICIOUS,
             req2,
             resp2,
@@ -611,7 +611,7 @@ func SearchKeyword_semihonest(conn *common.Conn, keyword string, useMaster bool)
     go func() {
         defer wg.Done()
         common.SendMessage(
-            config.Addr1 + config.Port1,
+            config.Addr[0] + config.Port[0],
             common.SEARCH_REQUEST_SEMIHONEST,
             req1,
             resp1,
@@ -624,7 +624,7 @@ func SearchKeyword_semihonest(conn *common.Conn, keyword string, useMaster bool)
     go func() {
         defer wg.Done()
         common.SendMessage(
-            config.Addr2 + config.Port2,
+            config.Addr[1] + config.Port[1],
             common.SEARCH_REQUEST_SEMIHONEST,
             req2,
             resp2,
@@ -669,7 +669,7 @@ func RunFastSetup(benchmarkDir string, useMaster bool) error {
     go func() {
         defer wg.Done()
         common.SendMessage(
-            config.Addr1 + config.Port1,
+            config.Addr[0] + config.Port[0],
             common.SETUP_REQUEST,
             req1,
             resp1,
@@ -682,7 +682,7 @@ func RunFastSetup(benchmarkDir string, useMaster bool) error {
     go func() {
         defer wg.Done()
         common.SendMessage(
-            config.Addr2 + config.Port2,
+            config.Addr[0] + config.Port[1],
             common.SETUP_REQUEST,
             req2,
             resp2,
@@ -839,12 +839,10 @@ func Setup(configFile string, bloomFilterSz int, numFiles int) string {
     c = &C.client{}
     C.setSystemParams(C.int(bloomFilterSz), C.int(numFiles));
     maskKey := make([]byte, hex.DecodedLen(len(config.MaskKey)))
-    macKey1 := make([]byte, hex.DecodedLen(len(config.MacKey1)))
-    macKey2 := make([]byte, hex.DecodedLen(len(config.MacKey2)))
+    macKey := make([]byte, hex.DecodedLen(len(config.MacKey)))
     hex.Decode(maskKey, []byte(config.MaskKey))
-    hex.Decode(macKey1, []byte(config.MacKey1))
-    hex.Decode(macKey2, []byte(config.MacKey2))
-    C.initializeClient((*C.client)(c), C.int(kNumThreads), (*C.uint8_t)(C.CBytes(maskKey)), (*C.uint8_t)(C.CBytes(macKey1)), (*C.uint8_t)(C.CBytes(macKey2)))
+    hex.Decode(macKey, []byte(config.MacKey))
+    C.initializeClient((*C.client)(c), C.int(kNumThreads), (*C.uint8_t)(C.CBytes(maskKey)), (*C.uint8_t)(C.CBytes(macKey)))
     C.initStemmer()
     return config.OutDir + strconv.Itoa(numFiles) + "_docs_" + strconv.Itoa(int(C.BLOOM_FILTER_SZ)) + "_latency"
 }

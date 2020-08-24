@@ -10,7 +10,7 @@
 #include <pthread.h>
 
 /* Setup for client. */
-int initializeClient(client *c, int numThreads, uint8_t *maskKey, uint8_t *macKey1, uint8_t *macKey2) {
+int initializeClient(client *c, int numThreads, uint8_t *maskKey, uint8_t *macKey) {
     int rv;
 
     for (int i = 0; i  < numThreads; i++) {
@@ -32,19 +32,19 @@ int initializeClient(client *c, int numThreads, uint8_t *maskKey, uint8_t *macKe
 
     c->sysVersion = 0;
 
-    c->macKey1Len = 16;
-    CHECK_A (c->macKey1 = malloc(c->macKey1Len));
-    CHECK_C (RAND_bytes(c->macKey1, c->macKey1Len));
-    CHECK_A (c->macKey1_ctx = EVP_CIPHER_CTX_new());
-    CHECK_C (EVP_EncryptInit_ex(c->macKey1_ctx, EVP_aes_128_ecb(),  NULL, c->macKey1, NULL));
+    c->macKeyLen = 16;
+    CHECK_A (c->macKey = malloc(c->macKeyLen));
+    CHECK_C (RAND_bytes(c->macKey, c->macKeyLen));
+    CHECK_A (c->macKey_ctx = EVP_CIPHER_CTX_new());
+    CHECK_C (EVP_EncryptInit_ex(c->macKey_ctx, EVP_aes_128_ecb(),  NULL, c->macKey, NULL));
 
     if (maskKey != NULL) {
         memcpy(c->maskKey, maskKey, 16);
         CHECK_C (EVP_EncryptInit_ex(c->maskKey_ctx, EVP_aes_128_ecb(), NULL, c->maskKey, NULL));
     }
-    if (macKey1 != NULL) {
-        memcpy(c->macKey1, macKey1, 16);
-        CHECK_C (EVP_EncryptInit_ex(c->macKey1_ctx, EVP_aes_128_ecb(),  NULL, c->macKey1, NULL));
+    if (macKey != NULL) {
+        memcpy(c->macKey, macKey, 16);
+        CHECK_C (EVP_EncryptInit_ex(c->macKey_ctx, EVP_aes_128_ecb(),  NULL, c->macKey, NULL));
     }
 
 cleanup:
@@ -56,8 +56,8 @@ void freeClient(client *c) {
     if (c->maskKey) free(c->maskKey);
     if (c->versions) free(c->versions);
     if (c->maskKey_ctx) EVP_CIPHER_CTX_free(c->maskKey_ctx);
-    if (c->macKey1) free(c->macKey1);
-    if (c->macKey1_ctx) EVP_CIPHER_CTX_free(c->macKey1_ctx);
+    if (c->macKey) free(c->macKey);
+    if (c->macKey_ctx) EVP_CIPHER_CTX_free(c->macKey_ctx);
 }
 
 /* Serialize row and version number, used to generate mask for row. */
@@ -200,7 +200,7 @@ int generateMACForEntry_malicious(client *c, uint32_t entry, int doc, int col, u
 
     uint8_t bufIn[MAC_BYTES];
     setMACBuf(c, bufIn, doc, col, entry);
-    CHECK_C (blockPrf(c->macKey1_ctx, (uint8_t *)mac, bufIn, sizeof(uint128_t)));
+    CHECK_C (blockPrf(c->macKey_ctx, (uint8_t *)mac, bufIn, sizeof(uint128_t)));
 cleanup:
     return rv;
 }

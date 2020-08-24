@@ -205,8 +205,10 @@ func searchKeyword_malicious(req common.SearchRequest_malicious) (common.SearchR
     var s *C.server = sNew
     if (req.Version == newVersionNum) {
         s = sNew
+        log.Println("new version num")
     } else if (req.Version == oldVersionNum) {
         s =  sOld
+        log.Println("old version num")
     }  else {
         log.Println("Unknown version number: ", req.Version)
     }
@@ -371,12 +373,10 @@ func updateDoc_semihonest(req common.UpdateRequest_semihonest) (common.UpdateRes
 func fastSetup(req common.SetupRequest) (common.SetupResponse, error) {
     c := &C.client{}
     maskKey := make([]byte, hex.DecodedLen(len(config.ClientMaskKey)))
-    macKey1 := make([]byte, hex.DecodedLen(len(config.ClientMacKey1)))
-    macKey2 := make([]byte, hex.DecodedLen(len(config.ClientMacKey2)))
+    macKey := make([]byte, hex.DecodedLen(len(config.ClientMacKey)))
     hex.Decode(maskKey, []byte(config.ClientMaskKey))
-    hex.Decode(macKey1, []byte(config.ClientMacKey1))
-    hex.Decode(macKey2, []byte(config.ClientMacKey2))
-    C.initializeClient((*C.client)(c), C.int(kNumThreads), (*C.uint8_t)(C.CBytes(maskKey)), (*C.uint8_t)(C.CBytes(macKey1)), (*C.uint8_t)(C.CBytes(macKey2)))
+    hex.Decode(macKey, []byte(config.ClientMacKey))
+    C.initializeClient((*C.client)(c), C.int(kNumThreads), (*C.uint8_t)(C.CBytes(maskKey)), (*C.uint8_t)(C.CBytes(macKey)))
 
     if (req.BenchmarkDir == "") {
         keywords := []string{"hello", "world"}

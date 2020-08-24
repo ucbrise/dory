@@ -1,4 +1,4 @@
-import sys, string
+import sys, string, json
 from benchClient import runDoryLatencyTest
 
 # FILL IN
@@ -20,7 +20,7 @@ f = open("out/latency_dory_" + ("malicious" if isMalicious.lower() == "true" els
 for i in range(11):
     numDocs = 2 ** (i + 10)
     print(("Number of docs = %d, bloom filter size = %d") % (numDocs, bloomFilterSzList[i]))
-    latencies = runDoryLatencyTest(master, replicas, clients[0], bloomFilterSzList[i], numDocs, 10000, isMalicious, 0)
+    latencies = runDoryLatencyTest(bloomFilterSzList[i], numDocs, 10000, isMalicious, 0)
     print("-------------------------")
     f.write(("Number of docs = %d, bloom filter size = %d\n") % (numDocs, bloomFilterSzList[i]))
     if not breakdown: 

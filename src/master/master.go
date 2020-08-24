@@ -44,6 +44,8 @@ var isMalicious bool
 
 var tickTime time.Duration
 
+var numClusters int
+
 /* Read in config file. */
 func setupConfig(filename string) (common.MasterConfig, error) {
     config := common.MasterConfig{}
@@ -74,135 +76,54 @@ func start2PC(version int, updateMapCopy map[int]common.Update) {
 
     commitReq := &common.BatchStartRequest{
         VersionNum:     version,
-	Updates:	updateMapCopy,
+	    Updates:	updateMapCopy,
         Malicious:      isMalicious, 
     }
-    commitResp1 := &common.BatchStartResponse{}
-    commitResp2 := &common.BatchStartResponse{}
-    commitResp3 := &common.BatchStartResponse{}
-    commitResp4 := &common.BatchStartResponse{}
-    var commitResp1Error error
-    var commitResp2Error error
-    var commitResp3Error error
-    var commitResp4Error error
+
+    finalCommit := true
+    var finalCommitLock sync.Mutex
 
     var wg1 sync.WaitGroup
-    if (config.Addr3 == "") {
-        wg1.Add(2)
-    } else {
-        wg1.Add(4)
-    }
+    wg1.Add(2 * numClusters)
 
-    go func() {
-        defer wg1.Done()
-        common.SendMessage(
-            config.Addr1 + config.Port1,
-            common.BATCH_START_REQUEST,
-            commitReq,
-            commitResp1,
-            &commitResp1Error,
-        )
-    }()
-
-    go func() {
-        defer wg1.Done()
-        common.SendMessage(
-            config.Addr2 + config.Port2,
-            common.BATCH_START_REQUEST,
-            commitReq,
-            commitResp2,
-            &commitResp2Error,
-        )
-    }()
-
-    if (config.Addr3 != "") {
-        go func() {
+    for i := 0; i < 2 * numClusters; i+= 1 {
+        go func(i int) {
+            var commitRespError error
+            commitResp := &common.BatchStartResponse{}
             defer wg1.Done()
             common.SendMessage(
-                config.Addr3 + config.Port3,
+                config.Addr[i] + config.Port[i],
                 common.BATCH_START_REQUEST,
                 commitReq,
-                commitResp3,
-                &commitResp3Error,
+                commitResp,
+                &commitRespError,
             )
-        }()
-
-        go func() {
-            defer wg1.Done()
-            common.SendMessage(
-                config.Addr4 + config.Port4,
-                common.BATCH_START_REQUEST,
-                commitReq,
-                commitResp4,
-                &commitResp4Error,
-            )
-        }()
-    }
-
-    wg1.Wait()
-
-    finalCommit := commitResp1.Commit && commitResp2.Commit
-    if (config.Addr3 != "") {
-        finalCommit = finalCommit && commitResp3.Commit && commitResp4.Commit
+            finalCommitLock.Lock()
+            finalCommit = commitResp.Commit
+            finalCommitLock.Unlock()
+        }(i)
     }
 
     finishReq := &common.BatchFinishRequest{
         Commit:     finalCommit,
     }
-    finishResp := &common.BatchFinishResponse{}
-    var finishRespError error
 
     var wg2 sync.WaitGroup
-    if (config.Addr3 == "") {
-        wg2.Add(2)
-    } else {
-        wg2.Add(4)
-    }
+    wg2.Add(2 * numClusters)
 
-    go func() {
-        defer wg2.Done()
-        common.SendMessage(
-            config.Addr1 + config.Port1,
-            common.BATCH_FINISH_REQUEST,
-            finishReq,
-            finishResp,
-            &finishRespError,
-        )
-    }()
-
-    go func() {
-        defer wg2.Done()
-        common.SendMessage(
-            config.Addr2 + config.Port2,
-            common.BATCH_FINISH_REQUEST,
-            finishReq,
-            finishResp,
-            &finishRespError,
-        )
-    }()
-
-    if (config.Addr3 != "") {
-        go func() {
+    for i := 0; i < 2 * numClusters; i += 1 {
+        go func(i int) {
+            finishResp := &common.BatchFinishResponse{}
+            var finishRespError error
             defer wg2.Done()
             common.SendMessage(
-                config.Addr3 + config.Port3,
+                config.Addr[i] + config.Port[i],
                 common.BATCH_FINISH_REQUEST,
                 finishReq,
                 finishResp,
                 &finishRespError,
             )
-        }()
-
-        go func() {
-            defer wg2.Done()
-            common.SendMessage(
-                config.Addr4 + config.Port4,
-                common.BATCH_FINISH_REQUEST,
-                finishReq,
-                finishResp,
-                &finishRespError,
-            )
-        }()
+        }(i)
     }
 
     wg2.Wait()
@@ -367,9 +288,11 @@ func main() {
     bloomFilterSz := flag.Int("bf_sz", 128, "bloom filter size in bits")
     tickMs := flag.Int("tick_ms", 1000, "batch time in ms")
     isMaliciousFlag := flag.Bool("malicious", true, "run with malicious checks")
+    numClustersFlag := flag.Int("num_clusters", 1, "number of clusters")
     flag.Parse()
     maxDocs = *maxDocsFlag
     isMalicious = *isMaliciousFlag
+    numClusters = *numClustersFlag
     tickTime = time.Duration(*tickMs) * time.Millisecond
     log.Println("tick time: ", tickTime)
 

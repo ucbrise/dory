@@ -19,13 +19,13 @@ typedef struct {
     int maskKeyLen;
     uint32_t *versions;
     uint32_t sysVersion;
-    uint8_t *macKey1;
-    EVP_CIPHER_CTX *macKey1_ctx;
-    int macKey1Len;
+    uint8_t *macKey;
+    EVP_CIPHER_CTX *macKey_ctx;
+    int macKeyLen;
 } client;
 
 /* Create and free client state. */
-int initializeClient(client *c, int numThreads, uint8_t *maskKey, uint8_t *macKey1, uint8_t *macKey2);
+int initializeClient(client *c, int numThreads, uint8_t *maskKey, uint8_t *macKey);
 void freeClient(client *c);
 
 /* Generate update. */

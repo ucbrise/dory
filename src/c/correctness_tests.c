@@ -146,7 +146,7 @@ int runSemiHonestTests() {
     char ***keywords;
     uint8_t docsPresent[MAX_DOCS_BYTES];
 
-    CHECK_C (initializeClient(&c, 1, NULL, NULL, NULL));
+    CHECK_C (initializeClient(&c, 1, NULL, NULL));
     CHECK_C (initializeServer(&s1, 1));
     CHECK_C (initializeServer(&s2, 1));
     printf("Setup complete\n");
@@ -189,7 +189,7 @@ int runMaliciousTests() {
     uint8_t docsPresent[NUM_DOCS_BYTES];
     printf("starting malicious tests\n");
 
-    CHECK_C (initializeClient(&c, 1, NULL, NULL, NULL));
+    CHECK_C (initializeClient(&c, 1, NULL, NULL));
     CHECK_C (initializeServer(&s1, 1));
     CHECK_C (initializeServer(&s2, 1));
     printf("Setup complete\n");

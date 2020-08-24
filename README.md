@@ -40,3 +40,6 @@ Use the scripts in `bench/` to run latency and throughput benchmarks on the syst
 
 We build on Saba Eskandarian's DPF implementation in https://github.com/SabaEskandarian/Express.
 
+
+Host *
+    StrictHostKeyChecking no

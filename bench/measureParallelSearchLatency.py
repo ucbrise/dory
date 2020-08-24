@@ -1,10 +1,5 @@
-import sys, string
+import sys, string, json
 from benchClient import runDoryLatencyTest
-
-# FILL IN
-clients = ["1.2.3.4"]
-master = "5.6.7.8"
-replicas = ["1.1.1.1", "2.2.2.2", "3.3.3.3", "4.4.4.4", "5.5.5.5", "6.6.6.6", "7.7.7.7", "8.8.8.8"]
 
 bloomFilterSzDict = {
         1024: 1120,
@@ -33,6 +28,12 @@ if numDocs not in bloomFilterSzDict:
 bloomFilterSz = bloomFilterSzDict[numDocs]
 print(("Using bloom filter size %d for num docs %d") % (bloomFilterSz, numDocs))
 
+f_config = open('../system.config')
+config = json.load(f_config)
+f_config.close()
+
+replicas = [server["Addr"] for server in config["Servers"]]
+
 f = open("out/latency_dory_parallel_" + str(numDocs), "w")
 
 # Measure for number of clusters 1, 2, 4
@@ -40,7 +41,7 @@ for i in range(3):
     numClusters = 2 ** i
     currNumDocs = numDocs / numClusters 
     print(("Num clusters = %d, each clusters has %d docs") % (numClusters, currNumDocs))
-    latencies = runDoryLatencyTest(master, replicas, clients[0], bloomFilterSz, currNumDocs, 10000, True, numClusters)
+    latencies = runDoryLatencyTest(config["MasterAddr"], replicas, config["ClientAddr"], bloomFilterSz, currNumDocs, 10000, True, numClusters)
     print("-------------------------")
     print(latencies[len(latencies) - 1])
     f.write(str(latencies[len(latencies) - 1]) + "\n")

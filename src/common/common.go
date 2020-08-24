@@ -6,17 +6,31 @@ import (
 
 const MAX_KEYWORD_SIZE = 32
 
+type Server struct {
+    Addr            string
+    Port            string
+    CertFile        string
+    KeyFile         string
+}
+
+type SystemConfig struct {
+    MasterAddr      string
+    MasterPort      string
+    MasterCertFile  string
+    MasterKeyFile   string
+    ClientAddrs     []string
+    Servers         []Server
+    OutDir          string
+    ClientMaskKey   string
+    ClientMacKey    string
+    SSHKeyPath      string
+}
+
 type MasterConfig struct {
     MasterAddr      string
     MasterPort      string
-    Addr1           string
-    Port1           string
-    Addr2           string
-    Port2           string
-    Addr3           string
-    Port3           string
-    Addr4           string
-    Port4           string
+    Addr            []string
+    Port            []string
     CertFile        string
     KeyFile         string
     OutDir          string
@@ -29,23 +43,17 @@ type ServerConfig struct {
     KeyFile         string
     OutDir          string
     ClientMaskKey   string
-    ClientMacKey1   string
-    ClientMacKey2   string
+    ClientMacKey    string
 }
 
 type ClientConfig struct {
     MasterAddr      string
     MasterPort      string
-    Addr1           string
-    Port1           string
-    Addr2           string
-    Port2           string
     Addr            []string
     Port            []string
     OutDir          string
     MaskKey         string
-    MacKey1         string
-    MacKey2         string
+    MacKey          string
 }
 
 type Update struct {

@@ -41,23 +41,23 @@ def generateUpdateLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious):
 
 def startDoryThroughputServers(bloomFilterSz, numDocs, tickMs):
     processes = []
-    masterCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null;cd dory; ./runMaster4.sh -n %s -b %s -t %s") % (masterPort, numDocs, bloomFilterSz, tickMs)
+    masterCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null;cd dory; ./runMaster4.sh -n %s -b %s -t %s") % (masterPort, numDocs, bloomFilterSz, tickMs)
     print(masterCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(master, masterCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replica1Cmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 1") % (replicaPorts[0], numDocs, bloomFilterSz)
+    replica1Cmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 1") % (replicaPorts[0], numDocs, bloomFilterSz)
     print(replica1Cmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[0], replica1Cmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replica2Cmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 2") % (replicaPorts[1], numDocs, bloomFilterSz)
+    replica2Cmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 2") % (replicaPorts[1], numDocs, bloomFilterSz)
     print(replica2Cmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[1], replica2Cmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replica3Cmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 3") % (replicaPorts[2], numDocs, bloomFilterSz)
+    replica3Cmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 3") % (replicaPorts[2], numDocs, bloomFilterSz)
     print(replica1Cmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[2], replica1Cmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replica4Cmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 4") % (replicaPorts[3], numDocs, bloomFilterSz)
+    replica4Cmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 4") % (replicaPorts[3], numDocs, bloomFilterSz)
     print(replica2Cmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[3], replica2Cmd),
         shell=True, stdout=devNull, stderr=devNull))
@@ -65,15 +65,15 @@ def startDoryThroughputServers(bloomFilterSz, numDocs, tickMs):
 
 def startDoryLatencyServers(bloomFilterSz, numDocs, tickMs):
     processes = []
-    masterCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runMaster.sh -n %d -b %s -t %s") % (masterPort, int(numDocs), bloomFilterSz, tickMs)
+    masterCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runMaster.sh -n %d -b %s -t %s") % (masterPort, int(numDocs), bloomFilterSz, tickMs)
     print(masterCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(master, masterCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replica1Cmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 1") % (replicaPorts[0], numDocs, bloomFilterSz)
+    replica1Cmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 1") % (replicaPorts[0], numDocs, bloomFilterSz)
     print(replica1Cmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[0], replica1Cmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replica2Cmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 2") % (replicaPorts[1], numDocs, bloomFilterSz)
+    replica2Cmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %s -b %s -s 2") % (replicaPorts[1], numDocs, bloomFilterSz)
     print(replica2Cmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[1], replica2Cmd),
         shell=True, stdout=devNull, stderr=devNull))
@@ -81,39 +81,39 @@ def startDoryLatencyServers(bloomFilterSz, numDocs, tickMs):
 
 def startParallelDoryLatencyServers(bloomFilterSz, numDocs, tickMs):
     processes = []
-    masterCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runMaster.sh -n %d -b %s -t %s") % (masterPort, numDocs, bloomFilterSz, tickMs)
+    masterCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runMaster.sh -n %d -b %s -t %s") % (masterPort, numDocs, bloomFilterSz, tickMs)
     print(masterCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(master, masterCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replicaCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 1") % (replicaPorts[0], numDocs, bloomFilterSz)
+    replicaCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 1") % (replicaPorts[0], numDocs, bloomFilterSz)
     print(replicaCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[0], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replicaCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 2") % (replicaPorts[1], numDocs, bloomFilterSz)
+    replicaCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 2") % (replicaPorts[1], numDocs, bloomFilterSz)
     print(replicaCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[1], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replicaCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 3") % (replicaPorts[2], numDocs, bloomFilterSz)
+    replicaCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 3") % (replicaPorts[2], numDocs, bloomFilterSz)
     print(replicaCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[2], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replicaCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 4") % (replicaPorts[3], numDocs, bloomFilterSz)
+    replicaCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 4") % (replicaPorts[3], numDocs, bloomFilterSz)
     print(replicaCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[3], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replicaCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 5") % (replicaPorts[4], numDocs, bloomFilterSz)
+    replicaCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 5") % (replicaPorts[4], numDocs, bloomFilterSz)
     print(replicaCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[4], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replicaCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 6") % (replicaPorts[5], numDocs, bloomFilterSz)
+    replicaCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 6") % (replicaPorts[5], numDocs, bloomFilterSz)
     print(replicaCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[5], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replicaCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 7") % (replicaPorts[6], numDocs, bloomFilterSz)
+    replicaCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 7") % (replicaPorts[6], numDocs, bloomFilterSz)
     print(replicaCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[6], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))
-    replicaCmd = ("sudo lsof -t -i tcp:%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 8") % (replicaPorts[7], numDocs, bloomFilterSz)
+    replicaCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runServer.sh -n %d -b %s -s 8") % (replicaPorts[7], numDocs, bloomFilterSz)
     print(replicaCmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[7], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))

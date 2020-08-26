@@ -8,8 +8,8 @@ if len(sys.argv) < 3:
 client = sys.argv[1]
 server = sys.argv[2]
 
-print(("Client IP address = %s" % (client))
-print(("Server IP address = %s" % (server))
+print(("Client IP address = %s") % (client))
+print(("Server IP address = %s") % (server))
 
 
 for i in range(2):

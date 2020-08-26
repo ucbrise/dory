@@ -94,11 +94,13 @@ This will produce plots close to Figures 10 and 11 on page 11 of the paper in `b
 
 To validate the baseline results we used for the above figures, we show how to reproduce our baseline results for 1,024 and 2,048 documents. This process takes several hours (whereas collecting all the data points takes approximately a week).
 
-For this experiment, you only need `baseline-client` and baseline-server` running, and you will need their IP addresses to pass as arguments to the script:
+For this experiment, you only need `baseline-client` and baseline-server` running. We do not run this experiment locally (broken SSH pipes over a long period of time make this more challenging to script). Instead, you must SSH into `baseline-client` directly. From `baseline-client`, you will need to SSH into `baseline-server`, which you can do by copying your SSH key to `baseline-client` or via SSH agent forwarding.
+
+Run the following commands on `baseline-client` (recommend doing this as a background task or in a `tmux` session because it takes a long time):
 ```
-cd bench
-python3 exp_baseline.py <client-IP-addr> <server-IP-addr>    # TODO: Add time estimate
-``` 
+cd dory/baseline
+./runTests.sh <server-IP-addr> <path-to-SSH-key>   # TODO: Add time estimate
+```
 
 TODO: explain how to compare to output
 

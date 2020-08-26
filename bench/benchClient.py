@@ -22,7 +22,7 @@ replicaPorts = [server["Port"] for server in config["Servers"]]
 devNull = open(os.devnull, 'w')
 
 def generateRemoteCmdStr(machine, remoteCmd):
-    return ("ssh -i %s %s@%s \"%s\"") % (keyPath, username, machine, remoteCmd)
+    return ("ssh -i %s -o StrictHostKeyChecking=no %s@%s \"%s\"") % (keyPath, username, machine, remoteCmd)
 
 def generateDoryThroughputClientLocalStr(numDocs, bloomFilterSz, seconds, threads, isMalicious, numUpdates, numSearches):
     return ("cd dory; ./runClient.sh -n %s -b %s -t true -x %s -y %s -m %s -q %s -r %s") % (numDocs, bloomFilterSz, seconds, threads, isMalicious, numUpdates, numSearches)
@@ -257,7 +257,7 @@ def initForDoryMixedThroughput(bloomFilterSz, numDocs, tickMs, clientS, threads,
 
     servers = startParallelDoryLatencyServers(bloomFilterSz, int(numDocs), tickMs)
     time.sleep(5)
-    runSetupClient(clients[0], generateDorySetupClientLocalStr(numDocs, bloomFilterSz, numClusters))
+    runSetupClient(generateDorySetupClientLocalStr(numDocs, bloomFilterSz, numClusters))
     time.sleep(3)
     return servers 
 
@@ -270,7 +270,7 @@ def runDoryMixedThroughputTest(bloomFilterSz, numDocs, tickMs, clientS, threads,
     throughput = runThroughputClients(clientStrs, clientS)
 
 def cleanupForDoryMixedThroughput(servers):
-    for i in range(len(serveres)):
+    for i in range(len(servers)):
         servers[i].terminate()
 
 def runUpdateLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious):

@@ -39,6 +39,9 @@ def generateDoryLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious, numCl
 def generateUpdateLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious):
     return ("cd dory; ./runClient.sh -n %s -b %s -m %s -d ../maildir -u true") % (numDocs, bloomFilterSz, isMalicious)
 
+def generateOramClientLocalStr(numDocs, oramServer):
+    return("cd dory/baseline; export GOPATH=/home/ec2-user/dory/baseline; go run src/client/run_client.go -n %s -addr %s:4441") % (numDocs, oramServer)
+
 def startDoryThroughputServers(bloomFilterSz, numDocs, tickMs):
     processes = []
     masterCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null;cd dory; ./runMaster4.sh -n %s -b %s -t %s") % (masterPort, numDocs, bloomFilterSz, tickMs)
@@ -118,6 +121,13 @@ def startParallelDoryLatencyServers(bloomFilterSz, numDocs, tickMs):
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[7], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))
     return processes
+
+def startOramServer(oramServer, numDocs):
+    serverCmd = ("sudo lsof -t -i tcp:4441 | sudo xargs kill > /dev/null &> /dev/null; sleep 1; cd dory/baseline; export GOPATH=/home/ec2-user/dory/baseline; go run src/server/run_server.go -n %s") % (numDocs)
+    print(serverCmd)
+    process = subprocess.Popen(generateRemoteCmdStr(oramServer, serverCmd),
+                shell=True, stdout=devNull, stderr=devNull)
+    return process
 
 def runSetupClient(clientLocalCmd):
     processes = []
@@ -217,7 +227,7 @@ def runLatencyClient(clientLocalCmd):
     print(("Latency = %s") % (tokens[len(tokens) - 1]))
     return tokens
 
-def runOramClient(clientLocalCmd):
+def runOramClient(clientLocalCmd, oramClient):
     processes = []
     
     print("Starting ORAM client...")
@@ -302,3 +312,10 @@ def runDoryLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious, numClusters)
 
     return latencies
 
+def runOramTest(oramServer, oramClient, numDocs):
+    print("Starting ORAM tests for num docs %s" % numDocs)
+    server = startOramServer(oramServer, numDocs)
+    time.sleep(5)
+    output = runOramClient(generateOramClientLocalStr(numDocs, oramServer), oramClient)
+    server.terminate()
+    return output

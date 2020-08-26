@@ -12,16 +12,17 @@ This prototype is released under the Apache v2 license (see [License](#license))
 
 2. Create the following EC2 instances (on-demand or spot) using the VM image provided:
 
-| Instance type | Region | Quantity |
-| --------------|:------:|:--------:|
-| `r5n.4xlarge` | `east-1` | 5 |
-| `c5.large` | `east-1` | 1 |
-| `r5n.4xlarge` | `east-2` | 4 |
-| `c5.large` | `west-1` | 1 |
-| `r5n.4xlarge` | `west-2` | 1 |
+| Instance type | Region | Quantity | Name(s) |
+| --------------|:------:|:--------:|:-------:|
+| `r5n.4xlarge` | `east-1` | 5 | `server1`, `server3`, `server5`, `server7`, `master` |
+| `c5.large` | `east-1` | 1 | `client` |
+| `r5n.4xlarge` | `east-2` | 4 | `server2`, `server4`, `server6`, `server8` |
+| `c5.large` | `west-1` | 1 | `baseline-client` |
+| `r5n.4xlarge` | `west-2` | 1 | `baseline-server` |
 
 This configuration was the one we used to generate our evaluation results, but you can also use different instsance types or regions (although you may obtain different results).
 
+TODO delete below:
 Label 1 `r5n.4xlarge east-1` instance `master`, and the other 4 `server1, server2, server3, server4`. Label the `c5.large` instance `client`. Label the 4 `r5n.4xlarge east-2` instances `server5, server6, server7, server8`. Label the 1 `c5.large west-1` instance `baseline-client` and the 1 `r5n.4xlarge west-2` instance `baseline-server`.
 
 To use our configuration scripts, make sure that you can access all of the instances using the same SSH key.
@@ -42,57 +43,43 @@ You've just finished setup! Follow the steps below to run experiments and reprod
 
 ## Running experiments
 
-These scripts use SSH to run experiments. If your version of SSH is configured to check for known hosts (the default configuration), this will cause the scripts to hang unless you have SSH'd into each of the machines before. If you do not want to SSH into each machine individually before running the experiments, add the following line to `~/.ssh/config`:
+TODO: explain fast setup somewhere
 
-```
-Host *
-    StrictHostKeyChecking no
-```
- [maybe can take this out]
+The experimental results in this paper compare DORY to a PathORAM baseline in `baseline/`. Unfortunately, running the experiments to produce the data in our paper takes about a week. We will show how to validate our baseline results for a small number of documents and then for the other figures, we will use the results we produced for the baseline in order to reproduce the figures in our paper.
+
+The experiments for Table 7, Figures 8b-8c, and Figures 10-11 cannot be run concurrently. However, the experiments for the baseline can be run at the same time as the DORY experiments (we recommend doing this to save time, as the baseline experiments take a few hours to complete).
 
 ### Table 7
 
-Run the experiment to collect the data for part of Table 7 showing the breakdown of search latency:
+Run the experiment to collect the data for part of Table 7 showing the breakdown of search latency. For this experiment, you only need to have `server-1`, `server-2`, `master`, and `client` running. Run the following commands locally:
 
 ```
 cd bench
-python3 exp_tab7.py     # TODO: Add time estimate
+python3 exp_tab7.py     # 9 minutes 
 ```
 
-This will produce data closely matching the left half of Table 7 on page 10 of the paper in `bench/out/tab7.dat`. For simplicity, we only show the numbers for one degree of parallelism (we exclude the two right-most columns). The affect of parallelism is shown in Figures 8b and 8c.
-
-### Baseline
-
-The experimental results in this paper compare DORY to a PathORAM baseline in `baseline/`. Unfortunately, running the experiments to produce the data in our paper takes about a week. The experiments will validate our baseline results for 1,024 and 2,048 documents. We will explain how to compare the results you produce to the ones in our paper, and then for the subsequent figures, we will use the results we produced for the baseline to reproduce the figures in our paper.
-
-Because this experiment takes several hours to run and running locally can lead to broken SSH pipes in some situations, SSH into `baseline-client` directly. Run the following:
-```
-cd dory/baseline;
-./runTests.sh       # TODO: Add time estimate
-``` 
-
-TODO: explain how to compare to output
+This will produce data closely matching the left half of Table 7 on page 10 of the paper in `bench/out/tab7.dat`. You might notice some variation compared to the numbers displayed in the table for network latency. This is due to the fact that to quickly reproduce the results for this table, we are not averaging over many trials. Also, for simplicity, we only show the numbers for one degree of parallelism (we exclude the two right-most columns). The effect of parallelism is shown in Figures 8b and 8c.
 
 ### Figures 8b-8c
 
-Run the experiment and then plot the data for Figures 8b and 8c showing the effect of parallelism on search latency as the number of documents increases:
+Run the experiment and then plot the data for Figures 8b and 8c showing the effect of parallelism on search latency as the number of documents increases. For this experiment, you need all instances except `baseline-client` and `baseline-server` running (so `server-1`-`server-8`, `master`, and `client`). Run the following commands locally:
 
 ```
 cd bench
-python3 exp_fig8b-c.py      # TODO: Add time estimate
+python3 exp_fig8b-c.py      # 18 minutes
 python3 plot_fig8b.py       # few seconds
 python3 plot_fig8c.py       # few seconds
 ```
 
-This will produce plots close to Figures 8b and 8c on page 11 of the paper in `bench/out/fig8b.png` and `bench/out/fig8c.png`. Note that these plotting scripts use the data we collected for the baseline (in `bench/ref`) rather than experimental data, and we show how to validate the data we collected for the baseline at a reduced scale above.
+This will produce plots close to Figures 8b and 8c on page 11 of the paper in `bench/out/fig8b.png` and `bench/out/fig8c.png`. Note that these plotting scripts use the data we collected for the baseline (in `bench/ref`) rather than experimental data, and we show how to validate the data we collected for the baseline at a reduced scale later.
 
 ### Figures 10-11
 
-Run the experiment and then plot the data for Figures 10 and 11 showing the effect of parallelism on throughput as the number of documents increases for different workloads:
+Run the experiment and then plot the data for Figures 10 and 11 showing the effect of parallelism on throughput as the number of documents increases for different workloads. For this experiment, you need all instances except `baseline-client` and `baseline-server` running (so `server-1`-`server-8`, `master`, and `client`). Run the following commands locally:
 
 ```
 cd bench
-python3 exp_fig10-11.py     # TODO: Add time estimate
+python3 exp_fig10-11.py     # 40 minutes
 python3 plot_fig10a.py      # few seconds
 python3 plot_fig10b.py      # few seconds
 python3 plot_fig10c.py      # few seconds
@@ -101,7 +88,19 @@ python3 plot_fig11b.py      # few seconds
 python3 plot_fig11c.py      # few seconds
 ```
 
-This will produce plots close to Figures 10 and 11 on page 11 of the paper in `bench/out/fig10a.png`, `bench/out/fig10b.png`, `bench/out/fig10c.png`, `bench/out/fig11a.png`, `bench/out/fig11b.png`, `bench/out/fig11c.png`. Again, these plotting scripts use the data collected for the baseline (in `bench/ref`) rather than experimental data, and we show how to validate the data we collected for the baseline at a reduced scale above.
+This will produce plots close to Figures 10 and 11 on page 11 of the paper in `bench/out/fig10a.png`, `bench/out/fig10b.png`, `bench/out/fig10c.png`, `bench/out/fig11a.png`, `bench/out/fig11b.png`, `bench/out/fig11c.png`. Again, these plotting scripts use the data collected for the baseline (in `bench/ref`) rather than experimental data, and we show how to validate the data we collected for the baseline at a reduced scale next.
+
+### Baseline
+
+To validate the baseline results we used for the above figures, we show how to reproduce our baseline results for 1,024 and 2,048 documents. This process takes several hours (whereas collecting all the data points takes approximately a week).
+
+For this experiment, you only need `baseline-client` and baseline-server` running, and you will need their IP addresses to pass as arguments to the script:
+```
+cd bench
+python3 exp_baseline.py <client-IP-addr> <server-IP-addr>    # TODO: Add time estimate
+``` 
+
+TODO: explain how to compare to output
 
 ## Stand-alone usage
 Start the master by running `runMaster.sh`, the servers by running `runServer.sh` and the client by running `runClient.sh`. Each script has a number of flags that can be set; run the scripts with `-h` to see all the flags.
@@ -131,8 +130,6 @@ If installing from source instead, follow the below instructions:
 2. Run `go get github.com/hashicorp/go-msgpack/codec`.
 3. Download and build `libstemmer` (http://snowball.tartarus.org/download.html), tested up to version 2.0.0.
 4. Move the output `libstemmer.o` to `src/c/`.
-
-
 
 ## Acknowledgements
 

@@ -8,8 +8,8 @@ replicas = ["1.1.1.1", "2.2.2.2"]
 
 bloomFilterSzList = [1120, 1280, 1440, 1600, 1800, 2000, 2240, 2520, 2800, 3120, 3480]
 
-isMalicious = true 
-breakdown = true
+isMalicious = True 
+breakdown = True
 
 f = open("out/tab7.dat", "w")
 

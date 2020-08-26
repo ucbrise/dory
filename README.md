@@ -74,11 +74,12 @@ python3 plot_fig8c.py       # few seconds
 
 This will produce plots close to Figures 8b and 8c on page 11 of the paper in `bench/out/fig8b.png` and `bench/out/fig8c.png`. Note that these plotting scripts use the data we collected for the baseline (in `bench/ref`) rather than experimental data, and we show how to validate the data we collected for the baseline at a reduced scale later.
 
+Figure 8b:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig8b.png" width="400">
-Figure 8b
 
+Figure 8c:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig8c.png" width="400">
-Figure 8c
+
 ### Figures 10-11
 
 Run the experiment and then plot the data for Figures 10 and 11 showing the effect of parallelism on throughput as the number of documents increases for different workloads. For this experiment, you need all instances except `baseline-client` and `baseline-server` running (so `server-1`-`server-8`, `master`, and `client`). Run the following commands locally:
@@ -96,18 +97,24 @@ python3 plot_fig11c.py      # few seconds
 
 This will produce plots close to Figures 10 and 11 on page 11 of the paper in `bench/out/fig10a.png`, `bench/out/fig10b.png`, `bench/out/fig10c.png`, `bench/out/fig11a.png`, `bench/out/fig11b.png`, `bench/out/fig11c.png`. Again, these plotting scripts use the data collected for the baseline (in `bench/ref`) rather than experimental data, and we show how to validate the data we collected for the baseline at a reduced scale next.
 
+Figure 10a:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig10a.png" width="400">
-Figure 10a
+
+Figure 10b:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig10b.png" width="400">
-Figure 10b
+
+Figure 10c:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig10c.png" width="400">
-Figure 10c
+
+Figure 11a:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig11a.png" width="400">
-Figure 11a
+
+Figure 11b:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig11b.png" width="400">
-Figure 11b
+
+Figure 11c:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig11c.png" width="400">
-Figure 11c
+
 
 ### Baseline
 

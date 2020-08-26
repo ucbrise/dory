@@ -20,7 +20,7 @@ dory_4_color = hash_colors[1]
 oram_color =  hash_colors[0]
 
 dory_1_y = []
-with open("ref/dory_throughput_1_9_1.dat", 'r') as f:
+with open("out/dory_throughput_1_9_1.dat", 'r') as f:
     for i, line in enumerate(f):
         dory_1_y.append(float(line))
 
@@ -28,7 +28,7 @@ with open("ref/dory_throughput_1_9_1.dat", 'r') as f:
 print(dory_1_y)
 
 dory_2_y = []
-with open("ref/dory_throughput_2_9_1.dat", 'r') as f:
+with open("out/dory_throughput_2_9_1.dat", 'r') as f:
     for i, line in enumerate(f):
         dory_2_y.append(float(line))
 
@@ -36,7 +36,7 @@ with open("ref/dory_throughput_2_9_1.dat", 'r') as f:
 print(dory_2_y)
 
 dory_4_y = []
-with open("ref/dory_throughput_4_9_1.dat", 'r') as f:
+with open("out/dory_throughput_4_9_1.dat", 'r') as f:
     for i, line in enumerate(f):
         dory_4_y.append(float(line))
 

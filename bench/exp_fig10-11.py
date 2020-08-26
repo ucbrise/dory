@@ -13,9 +13,9 @@ threads = 10
 
 def runExperimentRound(numClusters):
 
-    f91 = open("out/scale_mixed_throughput_dory_" + str(numClusters) + "_9_1", "w")
-    f55 = open("out/scale_mixed_throughput_dory_" + str(numClusters) + "_5_5", "w")
-    f19 = open("out/scale_mixed_throughput_dory_" + str(numClusters) + "_1_9", "w")
+    f91 = open("out/dory_throughput_" + str(numClusters) + "_9_1.dat", "w")
+    f55 = open("out/dory_throughput_" + str(numClusters) + "_5_5.dat", "w")
+    f19 = open("out/dory_throughput_" + str(numClusters) + "_1_9.dat", "w")
 
     # Measure throughput for documents 2^10 to 2^20 for
     # - 90% updates / 10% searches

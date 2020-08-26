@@ -278,6 +278,7 @@ def runDoryMixedThroughputTest(bloomFilterSz, numDocs, tickMs, clientS, threads,
     for i in range(len(clients)):
         clientStrs.append(generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, clientS, threads, numUpdates, numSearches, numClusters))
     throughput = runThroughputClients(clientStrs, clientS)
+    return throughput
 
 def cleanupForDoryMixedThroughput(servers):
     for i in range(len(servers)):

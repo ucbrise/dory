@@ -19,6 +19,8 @@ dory_2_color = hash_colors[4]
 dory_4_color = hash_colors[1]
 oram_color =  hash_colors[0]
 
+plt.rcParams.update({'font.size':22})
+
 dory_1_y = []
 with open("out/dory_throughput_1_1_9.dat", 'r') as f:
     for i, line in enumerate(f):
@@ -60,11 +62,11 @@ print(x)
 ax.plot(x, plot_1_y, label=r"DORY ($p=1$)", color=dory_1_color, linewidth=1)
 ax.plot(x, plot_2_y, label=r"DORY ($p=2$)", color=dory_2_color, linewidth=1)
 ax.plot(x, plot_4_y, label=r"DORY ($p=4$)", color=dory_4_color, linewidth=1)
-ax.set_xlabel("\# Documents")
+ax.set_xlabel("# Documents")
 ax.set_ylabel("Relative throughput")
 ax.set_xticks([ 500000, 1000000])
 ax.set_xticklabels(["0.5M", "1M"])
-ax.set_title("10\% U, 90\% S")
+ax.set_title("10% U, 90% S")
 
 plt.legend()
 plt.tight_layout()

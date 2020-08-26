@@ -19,6 +19,8 @@ dory_2_color = hash_colors[4]
 dory_4_color = hash_colors[1]
 oram_color =  hash_colors[0]
 
+plt.rcParams.update({'font.size':22})
+
 dory_1_y = []
 with open("out/dory_throughput_1_1_9.dat", 'r') as f:
     for i, line in enumerate(f):
@@ -56,7 +58,7 @@ ax.loglog(x, dory_1_y, label=r"DORY ($p=1$)", basex=2, basey=10, color=dory_1_co
 ax.loglog(x, dory_2_y, label=r"DORY ($p=2$)", basex=2, basey=10, color=dory_2_color, linewidth=1)
 ax.loglog(x, dory_4_y, label=r"DORY ($p=4$)", basex=2, basey=10, color=dory_4_color, linewidth=1)
 ax.loglog(oram_x, oram_y, label=r"PathORAM baseline", basex=2, basey=10, color=oram_color, linewidth=1, linestyle="dashed")
-ax.set_xlabel("\# Documents")
+ax.set_xlabel("# Documents")
 ax.set_ylabel("Operations/sec")
 ax.set_xticks([1024, 32768, 1048576])
 ax.set_yticks([100, 1, 0.01, 0.0001])

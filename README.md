@@ -40,9 +40,9 @@ You've just finished setup! Follow the steps below to run experiments and reprod
 
 ## Running experiments
 
-TODO: explain fast setup somewhere
-
 The experimental results in this paper compare DORY to a PathORAM baseline in `baseline/`. Unfortunately, running the experiments to produce the data in our paper takes about a week. We will show how to validate our baseline results for a small number of documents and then for the other figures, we will use the results we produced for the baseline in order to reproduce the figures in our paper.
+
+With the exception of the baseline experiment, all experiments produce `.dat` files with raw data in `bench/out` and figures corresponding to the ones in the paper as `.png` files in `bench/out`. The corresponding raw data and figures we produced for the paper are in `bench/ref` for comparison.
 
 The experiments for Table 7, Figures 8b-8c, and Figures 10-11 cannot be run concurrently. However, the experiments for the baseline can be run at the same time as the DORY experiments (we recommend doing this to save time, as the baseline experiments take a few hours to complete).
 
@@ -125,10 +125,10 @@ For this experiment, you only need `baseline-client` and baseline-server` runnin
 Run the following commands on `baseline-client` (recommend doing this as a background task or in a `tmux` session because it takes a long time):
 ```
 cd dory/baseline
-./runTests.sh <server-IP-addr> <path-to-SSH-key>   # TODO: Add time estimate
+./runTests.sh <server-IP-addr> <path-to-SSH-key>   # 70 minutes 
 ```
 
-TODO: explain how to compare to output
+When the tests are completed, open `dory/baseline/out/oram_1024` and `dory/baseline/out/oram_2048`. Compare the reported search latency to the search latency points in Figure 8b, or look at the exact data points in `bench/ref/latency_search_oram.dat` (all data points reported in milliseconds). Compare the throughput for different workloads to the throughput points in Figures 10a, 10b, and 10c, or look at the exact data points in `bench/ref/oram_throughput_1_9.dat`, `bench/ref/oram_throughput_5_5.dat`, and `bench/ref/oram_throughput_9_1.dat` (units are operations per second).
 
 ## Stand-alone usage
 Start the master by running `runMaster.sh`, the servers by running `runServer.sh` and the client by running `runClient.sh`. Each script has a number of flags that can be set; run the scripts with `-h` to see all the flags.

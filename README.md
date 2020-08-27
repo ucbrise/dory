@@ -10,7 +10,7 @@ This prototype is released under the Apache v2 license (see [License](#license))
 
 1. Run `git clone https://github.com/ucbrise/dory` locally. Make sure python3 is downloaded. In `bench/`, run `pip3 install requirements.txt`.
 
-2. Create the following EC2 instances (on-demand or spot) using the VM image provided:
+2. Create the following EC2 instances (on-demand or spot) using the AMI `ami-0312aaabfb63c15a9` (DORY-AE-v5):
 
 | Instance type | Region | Quantity | Name(s) |
 | --------------|:------:|:--------:|:-------:|

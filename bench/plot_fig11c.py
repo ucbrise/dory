@@ -66,7 +66,7 @@ ax.set_xlabel("# Documents")
 ax.set_ylabel("Relative throughput")
 ax.set_xticks([ 500000, 1000000])
 ax.set_xticklabels(["0.5M", "1M"])
-ax.set_title("10% U, 90% S")
+ax.set_title("50% U, 50% S")
 
 plt.legend()
 plt.tight_layout()

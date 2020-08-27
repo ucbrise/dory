@@ -86,7 +86,7 @@ Run the experiment and then plot the data for Figures 10 and 11 showing the effe
 
 ```
 cd bench
-python3 exp_fig10-11.py     # 65 minutes
+python3 exp_fig10-11.py     # 123 minutes
 python3 plot_fig10a.py      # few seconds
 python3 plot_fig10b.py      # few seconds
 python3 plot_fig10c.py      # few seconds
@@ -95,7 +95,7 @@ python3 plot_fig11b.py      # few seconds
 python3 plot_fig11c.py      # few seconds
 ```
 
-This will produce plots close to Figures 10 and 11 on page 11 of the paper in `bench/out/fig10a.png`, `bench/out/fig10b.png`, `bench/out/fig10c.png`, `bench/out/fig11a.png`, `bench/out/fig11b.png`, `bench/out/fig11c.png`. Again, these plotting scripts use the data collected for the baseline (in `bench/ref`) rather than experimental data, and we show how to validate the data we collected for the baseline at a reduced scale next.
+This will produce plots close to Figures 10 and 11 on page 11 of the paper in `bench/out/fig10a.png`, `bench/out/fig10b.png`, `bench/out/fig10c.png`, `bench/out/fig11a.png`, `bench/out/fig11b.png`, `bench/out/fig11c.png`. Again, these plotting scripts use the data collected for the baseline (in `bench/ref`) rather than experimental data, and we show how to validate the data we collected for the baseline at a reduced scale next. You may see some variation in comparison to the graphs from the paper because we do not average over multiple trials in order to save time.
 
 Figure 10a:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig10a.png" width="400">

@@ -86,7 +86,7 @@ Run the experiment and then plot the data for Figures 10 and 11 showing the effe
 
 ```
 cd bench
-python3 exp_fig10-11.py     # 40 minutes
+python3 exp_fig10-11.py     # 65 minutes
 python3 plot_fig10a.py      # few seconds
 python3 plot_fig10b.py      # few seconds
 python3 plot_fig10c.py      # few seconds
@@ -120,7 +120,7 @@ Figure 11c:
 
 To validate the baseline results we used for the above figures, we show how to reproduce our baseline results for 1,024 and 2,048 documents. This process takes several hours (whereas collecting all the data points takes approximately a week).
 
-For this experiment, you only need `baseline-client` and baseline-server` running. We do not run this experiment locally (broken SSH pipes over a long period of time make this more challenging to script). Instead, you must SSH into `baseline-client` directly. From `baseline-client`, you will need to SSH into `baseline-server`, which you can do by copying your SSH key to `baseline-client` or via SSH agent forwarding.
+For this experiment, you only need `baseline-client` `and baseline-server` running. We do not run this experiment locally (broken SSH pipes over a long period of time make this more challenging to script). Instead, you must SSH into `baseline-client` directly. From `baseline-client`, you will need to SSH into `baseline-server`, which you can do by copying your SSH key to `baseline-client` or via SSH agent forwarding.
 
 Run the following commands on `baseline-client` (recommend doing this as a background task or in a `tmux` session because it takes a long time):
 ```

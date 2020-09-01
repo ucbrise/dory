@@ -10,7 +10,7 @@ regionAMIs = {
         }   
 
 def runSetup():
-    '''
+    
     cmd = "aws ec2 create-key-pair --key-name DoryKeyPair --query 'KeyMaterial' --output text > ~/.ssh/dory.pem; sudo chmod 400 ~/.ssh/dory.pem; ssh-keygen -y -f ~/.ssh/dory.pem > $HOME/.ssh/id_rsa_DoryKeyPair.pub;"
     process = subprocess.Popen(cmd, shell=True)
     process.wait()
@@ -18,7 +18,7 @@ def runSetup():
     cmd = "aws ec2 import-key-pair --key-name DoryKeyPair --public-key-material fileb://$HOME/.ssh/id_rsa_DoryKeyPair.pub --region us-east-1 ; aws ec2 import-key-pair --key-name DoryKeyPair --public-key-material fileb://$HOME/.ssh/id_rsa_DoryKeyPair.pub --region us-east-2; aws ec2 import-key-pair --key-name DoryKeyPair --public-key-material fileb://$HOME/.ssh/id_rsa_DoryKeyPair.pub --region us-west-1 ; aws ec2 import-key-pair --key-name DoryKeyPair --public-key-material fileb://$HOME/.ssh/id_rsa_DoryKeyPair.pub --region us-west-2"
     process = subprocess.Popen(cmd, shell=True)
     process.wait()
-    '''
+    
     regions = ["us-east-1", "us-east-2", "us-west-1", "us-west-2"]
 
     for region in regions:

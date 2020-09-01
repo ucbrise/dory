@@ -152,7 +152,7 @@ func runInteractiveSearches(configFile string, numDocs int, bloomFilterSz int, i
         } else {
             docs, _ = client.SearchKeyword_semihonest(conn, keyword, useMaster)
         }
-        log.Printf("Found %s in: \n", keyword)
+        log.Printf("Found keyword in: \n")
         found := false
         for i := uint(0); i < uint(numDocs); i++ {
             if (docs[i / 8] & (1 << (i % 8)) != 0) {

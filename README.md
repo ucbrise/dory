@@ -52,7 +52,6 @@ Make sure to wait a few minutes between tearing down one cluster and setting up 
 You've just finished setup! Follow the steps below to run experiments and reproduce our results.
 
 
-
 ## Running experiments
 
 The experimental results in this paper compare DORY to a PathORAM baseline in `baseline/`. Unfortunately, running the experiments to produce the data in our paper takes about a week. We will show how to validate our baseline results for a small number of documents and then for the other figures, we will use the results we produced for the baseline in order to reproduce the figures in our paper.
@@ -62,6 +61,25 @@ With the exception of the baseline experiment, all experiments produce `.dat` fi
 The experiments for Table 7, Figures 8b-8c, and Figures 10-11 cannot be run concurrently. However, the experiments for the baseline can be run at the same time as the DORY experiments (we recommend doing this to save time, as the baseline experiments take a few hours to complete).
 
 To speed up testing, some of the experiments start with an index that is built by the server where the server has the keys to generate a correct search index. This configuration should only be used for testing (for security, only the client should have the keys).
+
+### Baseline
+
+To validate the baseline results we used for the above figures, we show how to reproduce our baseline results for 1,024 and 2,048 documents. This process takes several hours (whereas collecting all the data points takes approximately a week).
+
+Run the following commands to start the experiment:
+```
+cd dory/baseline
+python3 start_baseline.py   # 1 minute
+```
+
+This script starts the experiment and returns immediately. In approximately 70 minutes, retrieve the results by running: 
+```
+cd dory/baseline
+python3 get_baseline_results.py     # Run 70 minutes after start_baseline.py
+```
+This will copy the output of the baseline experiments to `dory/baseline/out/oram_1024` and `dory/baseline/out/oram_2048`.
+
+Compare the reported search latency to the search latency points in Figure 8b, or look at the exact data points in `bench/ref/latency_search_oram.dat` (all data points reported in milliseconds). Compare the throughput for different workloads to the throughput points in Figures 10a, 10b, and 10c, or look at the exact data points in `bench/ref/oram_throughput_1_9.dat`, `bench/ref/oram_throughput_5_5.dat`, and `bench/ref/oram_throughput_9_1.dat` (units are operations per second).
 
 ### Table 7
 
@@ -131,26 +149,31 @@ Figure 11c:
 <img src="https://github.com/ucbrise/dory/blob/master/bench/ref/fig11c.png" width="400">
 
 
-### Baseline
+## Test and play with functionality
 
-To validate the baseline results we used for the above figures, we show how to reproduce our baseline results for 1,024 and 2,048 documents. This process takes several hours (whereas collecting all the data points takes approximately a week).
+Outside of replicating our results, you can also run correctness tests and interactively search for keywords over a set of sample documents. You can do this remotely or locally.
 
-Run the following commands to start the experiment:
+### Building from source
+
+If installing from source, follow the below instructions:
+1. Install OpenSSL, tested up to version 2.6.5.
+2. Run `go get github.com/hashicorp/go-msgpack/codec`.
+3. Download and build `libstemmer` (http://snowball.tartarus.org/download.html), tested up to version 2.0.0.
+4. Move the output `libstemmer.o` to `src/c/`.
+5. In `bench/` run `pip3 install -r requirements.txt`.
+
+### Local configuration
+
+To configure DORY to run locally, run the following:
+
 ```
-cd dory/baseline
-python3 start_baseline.py   # 1 minute
+cd dory/bench
+python3 start_local.py
 ```
 
-This script starts the experiment and returns immediately. In approximately 70 minutes, retrieve the results by running: 
-```
-cd dory/baseline
-python3 get_baseline_results.py     # Run 70 minutes after start_baseline.py
-```
-This will copy the output of the baseline experiments to `dory/baseline/out/oram_1024` and `dory/baseline/out/oram_2048`.
+You can then start the master, servers, and client on your local machine.
 
-Compare the reported search latency to the search latency points in Figure 8b, or look at the exact data points in `bench/ref/latency_search_oram.dat` (all data points reported in milliseconds). Compare the throughput for different workloads to the throughput points in Figures 10a, 10b, and 10c, or look at the exact data points in `bench/ref/oram_throughput_1_9.dat`, `bench/ref/oram_throughput_5_5.dat`, and `bench/ref/oram_throughput_9_1.dat` (units are operations per second).
-
-## Stand-alone usage
+### Running DORY 
 Start the master by running `runMaster.sh`, the servers by running `runServer.sh` and the client by running `runClient.sh`. Each script has a number of flags that can be set; run the scripts with `-h` to see all the flags.
 
 For example, to start test DORY on a single machine (with two servers), use the default config files and run:
@@ -165,19 +188,8 @@ Without any flags set, the client will load all the documents in `sample_docs` (
 
 Make sure to always set the Bloom filter size and the max number of documents the same across the master, servers, and clients. The only exception is when running with cluster sizes greater than 1; in this case, every entity should use the same Bloom filter size, the master and client should use the correct maximum number of documents, and the servers should use the maximum  number of documents divided by the number of clusters. To run with multiple clusters, you will need a number of servers equal to 2 times the number of clusters.
 
-## Tests
+### Tests
 To test the low-level crypto, run `make` in `src/c` and run `correctness_tests`. To test the end-to-end system, run the client with the correctness test flag set to true (`-c`).
-
-## Benchmarks
-Use the scripts in `bench/` to run latency and throughput benchmarks on the system. Update the scripts with the IP addresses and ports of the different entities before running.
-
-## Building from source
-
-If installing from source instead, follow the below instructions:
-1. Install OpenSSL, tested up to version 2.6.5.
-2. Run `go get github.com/hashicorp/go-msgpack/codec`.
-3. Download and build `libstemmer` (http://snowball.tartarus.org/download.html), tested up to version 2.0.0.
-4. Move the output `libstemmer.o` to `src/c/`.
 
 ## Acknowledgements
 

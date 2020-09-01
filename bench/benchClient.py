@@ -145,7 +145,6 @@ def runSetupClient(clientLocalCmd):
     outputLines = [line.decode('utf-8') for line in rawOutputLines]
     if len(outputLines) == 0:
         output = process.stdout.read()
-        print(output)
     print("Done with setup.")
 
 
@@ -186,7 +185,6 @@ def runThroughputClients(clientLocalCmds, seconds):
             rawOutputLines = output.splitlines()
             outputLines = [line.decode('utf-8') for line in rawOutputLines]
         tokens =  outputLines[len(outputLines) -  1].split()
-        print(tokens)
         updates = -1
         try:
             updates = int(tokens[len(tokens) - 1])
@@ -205,7 +203,6 @@ def runLatencyClient(clientLocalCmd):
     
     print("Starting all clients...")
     totalUpdates = 0
-    print(clientLocalCmd)
     print(generateRemoteCmdStr(clients[0], clientLocalCmd))
     process = subprocess.Popen(generateRemoteCmdStr(clients[0], clientLocalCmd),
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -221,7 +218,6 @@ def runLatencyClient(clientLocalCmd):
         rawOutputLines = output.splitlines()
         outputLines = [line.decode('utf-8') for line in rawOutputLines]
     tokens =  outputLines[len(outputLines) -  1].split()
-    print(tokens)
     latency = float(tokens[len(tokens) - 1])
 
     print(("Latency = %s") % (tokens[len(tokens) - 1]))
@@ -238,7 +234,6 @@ def runOramClient(clientLocalCmd, oramClient):
     print("Started client")
 
     output = process.stderr.read()
-    print(output)
     rawOutputLines = output.splitlines()
     outputLines = [line.decode('utf-8') for line in rawOutputLines]
     if len(outputLines) == 0:

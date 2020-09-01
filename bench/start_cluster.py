@@ -97,7 +97,7 @@ baselineClientAddr = (c["Reservations"][0]["Instances"][0]["PublicIpAddress"])
 print("Created all us-west-1 instances")
 
 # US-WEST-2
-cmd = ('export AWS_DEFAULT_REGION=us-west-2; aws ec2 run-instances --image-id %s --count 1 --instance-type r5.large --key-name DoryKeyPair --placement "{\\\"AvailabilityZone\\\": \\\"us-west-2b\\\"}" --security-groups DoryGroup') % (regionAMIs["us-west-2"])
+cmd = ('export AWS_DEFAULT_REGION=us-west-2; aws ec2 run-instances --image-id %s --count 1 --instance-type r5n.4xlarge --key-name DoryKeyPair --placement "{\\\"AvailabilityZone\\\": \\\"us-west-2b\\\"}" --security-groups DoryGroup') % (regionAMIs["us-west-2"])
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 out = process.stdout.read()
 west2Config = json.loads(out)

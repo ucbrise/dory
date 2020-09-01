@@ -161,7 +161,7 @@ with open("../src/config/master.config", "w") as f:
     f.write(masterConfigBlob)
 
 # Wait for all instances to be fully started
-time.sleep(10)
+time.sleep(30)
 
 if sysConfig["MasterAddr"] != "127.0.0.1":
     cmd = ("scp -i %s -o StrictHostKeyChecking=no $(PWD)/../src/config/master.config ec2-user@%s:~/dory/src/config/master.config") % (sshKeyPath, sysConfig["MasterAddr"])

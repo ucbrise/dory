@@ -35,12 +35,14 @@ python3 init.py
 ```
 This will create a SSH keypair and security groups in `east-1` and `east-2`. The script will ask you to enter your password to change the permissions on the SSH private key file (`~/.ssh/dory.pem`). You should only run this setup once, and do not need to repeat this step if you set up another cluster (if you try to repeat this step, you will likely get error messages saying that the security key and/or security groups already exist).
 
-5. [1 minute] To start a cluster, run the following:
+5. [2 minutes] To start a cluster, run the following:
 ```
 cd bench
 python3 start_cluster.py
 ```
 This will create the EC2 instances for the experiments using the correct AMI and copy configuration files to each instance. Default TLS keys and certificates are included for testing. You do not need to change these to run evaluation benchmarks, but in a real deployment, these should be freshly generated for security.
+
+Note: If you see a message that a SSH connection was refused on port 22, then the script was not able to copy over the configuration file because the instance had not fully started yet. In this case, either teardown the cluster and restart (waiting a few minutes between teardown and starting again), or manually copy the configuration files yourself using `scp`.
 
 6. When you are done with experiments (or just done for the day), run the following to terminate all instances:
 ```

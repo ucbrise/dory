@@ -5,7 +5,7 @@ import(
     "oram"
     "fmt"
     "math/rand"
-//    "time"
+    "time"
 )
 
 const blockSize = 100 * 4
@@ -74,8 +74,8 @@ func main() {
     fmt.Println("finished adding server")
     c.SaveState()
 
-    numTrials := uint64(100)
-
+    numTrials := 10
+/*
     oram.StartCtr()
     for i := uint64(0); i < numTrials; i++ {
         runSearch(c, numAccesses, numBlocks)
@@ -90,8 +90,8 @@ func main() {
 
     fmt.Printf("Search bw: %d KB\n", searchBW / 1024 / numTrials)
     fmt.Printf("Update bw: %d KB\n", updateBW / 1024 / numTrials)
-
-/*    startSearch := time.Now()
+*/
+    startSearch := time.Now()
     for i := 0; i < numTrials; i++ {
         runSearch(c, numAccesses, numBlocks)
     }
@@ -137,5 +137,5 @@ func main() {
 
     fmt.Printf("Total time for 90/10 workload: %s\n", throughputTime_9_1)
     fmt.Printf("Throughput for 90/10 workload: %f ops/sec\n", float64(numTrials) / throughputTime_9_1.Seconds())
-*/
+
 }

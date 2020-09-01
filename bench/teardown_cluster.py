@@ -31,6 +31,7 @@ for i in range(len(sysConfig["Servers"])):
     region = "us-east-1"
     if i % 2 != 0:
         region = "us-east-2"
+    print(cmd)
     cmd = ('export AWS_DEFAULT_REGION=%s; aws ec2 terminate-instances --instance-ids "%s"') % (region, sysConfig["Servers"][i]["ID"])
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     process.wait()

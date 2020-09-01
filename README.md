@@ -8,19 +8,43 @@ This prototype is released under the Apache v2 license (see [License](#license))
 
 ## Setup
 
-1. [1 minute] Run `git clone https://github.com/ucbrise/dory` locally. Make sure python3 is downloaded. In `bench/`, run `pip3 install -r requirements.txt`.
+1. [2 minutes] Make sure python3 is downloaded. Then run the following:
+```
+git clone https://github.com/ucbrise/dory
+cd dory/bench
+mkdir out
+pip3 install -r requirements.txt
+
+```
 
 2. [5 minutes] Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) and run `aws configure` using the instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) (use `json` as the default output format, and it does not matter what default region you choose).
 
 3. [Up to 1 day for vCPU limit increase request] Request a vCPU limit of 128 for `east-1` and `east-2`.
 
-4. [1 minute] Run `python3 init.py` in `bench/`. This will create a SSH keypair and security groups in `east-1` and `east-2`. The script will ask you to enter your password to change the permissions on the SSH private key file (`~/.ssh/dory.pem`). You should only run this setup once, and do not need to repeat this step if you set up another cluster (if you try to repeat this step, you will likely get error messages saying that the security key and/or security groups already exist).
+4. [1 minute] To initialize EC2 keypairs and security groups, run the following:
+```
+cd bench
+python3 init.py
+```
+This will create a SSH keypair and security groups in `east-1` and `east-2`. The script will ask you to enter your password to change the permissions on the SSH private key file (`~/.ssh/dory.pem`). You should only run this setup once, and do not need to repeat this step if you set up another cluster (if you try to repeat this step, you will likely get error messages saying that the security key and/or security groups already exist).
 
-5. [1 minute] Run `python3 start_cluster.py` in `bench/`. This will create the EC2 instances for the experiments using the correct AMI and copy configuration files to each instance. Default TLS keys and certificates are included for testing. You do not need to change these to run evaluation benchmarks, but in a real deployment, these should be freshly generated for security.
+5. [1 minute] To start a cluster, run the following:
+```
+cd bench
+python3 start_cluster.py
+```
+This will create the EC2 instances for the experiments using the correct AMI and copy configuration files to each instance. Default TLS keys and certificates are included for testing. You do not need to change these to run evaluation benchmarks, but in a real deployment, these should be freshly generated for security.
 
-6. When you are done with experiments (or just done for the day), run `python3 teardown_cluster.py` to terminate all the instances. 
+6. When you are done with experiments (or just done for the day), run the following to terminate all instances:
+```
+cd bench
+python3 teardown_cluster.py
+```
+Make sure to wait a few minutes between tearing down one cluster and setting up another cluster. It takes a few minutes for instances to fully terminate, and if you try to set up another cluster before the other has been fully shut down, you will exceed your vCPU limits.
 
 You've just finished setup! Follow the steps below to run experiments and reproduce our results.
+
+
 
 ## Running experiments
 
@@ -104,15 +128,20 @@ Figure 11c:
 
 To validate the baseline results we used for the above figures, we show how to reproduce our baseline results for 1,024 and 2,048 documents. This process takes several hours (whereas collecting all the data points takes approximately a week).
 
-For this experiment, you only need `baseline-client` `and baseline-server` running. We do not run this experiment locally (broken SSH pipes over a long period of time make this more challenging to script). Instead, you must SSH into `baseline-client` directly. From `baseline-client`, you will need to SSH into `baseline-server`, which you can do by copying your SSH key to `baseline-client` or via SSH agent forwarding.
-
-Run the following commands on `baseline-client` (recommend doing this as a background task or in a `tmux` session because it takes a long time):
+Run the following commands to start the experiment:
 ```
 cd dory/baseline
-./runTests.sh <server-IP-addr> <path-to-SSH-key>   # 70 minutes 
+python3 start_baseline.py   # 1 minute
 ```
 
-When the tests are completed, open `dory/baseline/out/oram_1024` and `dory/baseline/out/oram_2048`. Compare the reported search latency to the search latency points in Figure 8b, or look at the exact data points in `bench/ref/latency_search_oram.dat` (all data points reported in milliseconds). Compare the throughput for different workloads to the throughput points in Figures 10a, 10b, and 10c, or look at the exact data points in `bench/ref/oram_throughput_1_9.dat`, `bench/ref/oram_throughput_5_5.dat`, and `bench/ref/oram_throughput_9_1.dat` (units are operations per second).
+This script starts the experiment and returns immediately. In approximately 70 minutes, retrieve the results by running: 
+```
+cd dory/baseline
+python3 get_baseline_results.py     # Run 70 minutes after start_baseline.py
+```
+This will copy the output of the baseline experiments to `dory/baseline/out/oram_1024` and `dory/baseline/out/oram_2048`.
+
+Compare the reported search latency to the search latency points in Figure 8b, or look at the exact data points in `bench/ref/latency_search_oram.dat` (all data points reported in milliseconds). Compare the throughput for different workloads to the throughput points in Figures 10a, 10b, and 10c, or look at the exact data points in `bench/ref/oram_throughput_1_9.dat`, `bench/ref/oram_throughput_5_5.dat`, and `bench/ref/oram_throughput_9_1.dat` (units are operations per second).
 
 ## Stand-alone usage
 Start the master by running `runMaster.sh`, the servers by running `runServer.sh` and the client by running `runClient.sh`. Each script has a number of flags that can be set; run the scripts with `-h` to see all the flags.

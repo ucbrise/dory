@@ -3,11 +3,13 @@ import subprocess
 import benchClient
 
 regionAMIs = {
-        "us-east-1": "ami-057e79f5781fe8619",
-        "us-east-2": "ami-09d625653d2d6cc74",
+        "us-east-1": "ami-0de2fb949cbb240c6",
+        "us-east-2": "ami-05cbdb8342970b14d",
         }
 
 filename = "../system.config"
+
+print("Starting cluster...")
 
 f_config = open(filename, "r")
 sysConfig = json.load(f_config)
@@ -26,7 +28,6 @@ east12Config = json.loads(out)
 east12IDs = [instance["InstanceId"] for instance in east12Config["Instances"]]
 
 cmd = ('export AWS_DEFAULT_REGION=us-east-1; aws ec2 run-instances --image-id %s --count 5 --instance-type r5n.4xlarge --key-name DoryKeyPair --placement "{\\\"AvailabilityZone\\\": \\\"us-east-1b\\\"}" --security-groups DoryGroup') % (regionAMIs["us-east-1"])
-#cmd = ('aws ec2 run-instances --image-id %s --count 5 --instance-type r5n.4xlarge --key-name DoryKeyPair --placement "{\\\"AvailabilityZone\\\": \\\"us-east-1b\\\"}" --security-groups DoryGroup') % (regionAMIs["us-east-1"])
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 out = process.stdout.read()
 east11Config = json.loads(out)
@@ -92,7 +93,7 @@ for i in range(len(sysConfig["Servers"])):
 
 sysConfig["BaselineServerAddr"] = server2Addrs[0]
 sysConfig["BaselineServerID"] = east2IDs[0]
-sysConfig["BaselineClientAddr"] = [clientAddrs[1]]
+sysConfig["BaselineClientAddr"] = clientAddrs[1]
 sysConfig["BaselineClientID"] = east12IDs[1]
 
 sysConfig["SSHKeyPath"] = "~/.ssh/dory.pem"
@@ -124,6 +125,9 @@ print("Copying config files to instances")
 
 with open("../src/config/master.config", "w") as f:
     f.write(masterConfigBlob)
+
+# Wait for all instances to be fully started
+time.sleep(10)
 
 if sysConfig["MasterAddr"] != "127.0.0.1":
     cmd = ("scp -i %s -o StrictHostKeyChecking=no $(PWD)/../src/config/master.config ec2-user@%s:~/dory/src/config/master.config") % (sshKeyPath, sysConfig["MasterAddr"])

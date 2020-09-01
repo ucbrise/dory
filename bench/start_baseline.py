@@ -12,10 +12,6 @@ baselineServerAddr = config["BaselineServerAddr"]
 baselineClientAddr = config["BaselineClientAddr"]
 devNull = open(os.devnull, 'w')
 
-cmd = ("scp -i %s -o StrictHostKeyChecking=no %s %s@%s:%s") % (keyPath, keyPath, username, baselineServerAddr, keyPath)
-process = subprocess.Popen(cmd, shell=True)
-process.wait()
-
 cmd = ("scp -i %s -o StrictHostKeyChecking=no %s %s@%s:%s") % (keyPath, keyPath, username, baselineClientAddr, keyPath)
 process = subprocess.Popen(cmd, shell=True)
 process.wait()

@@ -19,7 +19,14 @@ pip3 install -r requirements.txt
 
 2. [5 minutes] Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) and run `aws configure` using the instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) (use `json` as the default output format, and it does not matter what default region you choose).
 
-3. [Up to 1 day for vCPU limit increase request] Request a vCPU limit of 128 for `east-1` and `east-2`.
+3. [Up to 1 day for vCPU limit increase request] Request a vCPU limit to satisfy the following requirements:
+
+| Region | vCPU quantity |
+| -------|:-------------:|
+| `east-1` | 82 |
+| `east-2` | 64 |
+| `west-1` | 2 |
+| `west-2` | 16 |
 
 4. [1 minute] To initialize EC2 keypairs and security groups, run the following:
 ```

@@ -8,6 +8,7 @@ const MAX_KEYWORD_SIZE = 32
 
 type Server struct {
     Addr            string
+    ID              string
     Port            string
     CertFile        string
     KeyFile         string
@@ -15,15 +16,21 @@ type Server struct {
 
 type SystemConfig struct {
     MasterAddr      string
+    MasterID        string
     MasterPort      string
     MasterCertFile  string
     MasterKeyFile   string
     ClientAddrs     []string
+    ClientIDs       []string
     Servers         []Server
     OutDir          string
     ClientMaskKey   string
     ClientMacKey    string
     SSHKeyPath      string
+    BaselineServerAddr  string
+    BaselineServerID    string
+    BaselineClientAddr  string
+    BaselineClientID    string
 }
 
 type MasterConfig struct {

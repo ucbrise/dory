@@ -8,35 +8,19 @@ This prototype is released under the Apache v2 license (see [License](#license))
 
 ## Setup
 
-1. Run `git clone https://github.com/ucbrise/dory` locally. Make sure python3 is downloaded. In `bench/`, run `pip3 install requirements.txt`.
+1. [1 minute] Run `git clone https://github.com/ucbrise/dory` locally. Make sure python3 is downloaded. In `bench/`, run `pip3 install -r requirements.txt`.
 
-2. Create the following EC2 instances (on-demand or spot) using the AMI `ami-0312aaabfb63c15a9` (DORY-AE-v5):
+2. [5 minutes] Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) and run `aws configure` using the instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) (use `json` as the default output format, and it does not matter what default region you choose).
 
-| Instance type | Region | Quantity | Name(s) |
-| --------------|:------:|:--------:|:-------:|
-| `r5n.4xlarge` | `east-1` | 5 | `server1`, `server3`, `server5`, `server7`, `master` |
-| `c5.large` | `east-1` | 1 | `client` |
-| `r5n.4xlarge` | `east-2` | 4 | `server2`, `server4`, `server6`, `server8` |
-| `c5.large` | `west-1` | 1 | `baseline-client` |
-| `r5n.4xlarge` | `west-2` | 1 | `baseline-server` |
+3. [Up to 1 day for vCPU limit increase request] Request a vCPU limit of 128 for `east-1` and `east-2`.
 
-This configuration was the one we used to generate our evaluation results, but you can also use different instsance types or regions (although you may obtain different results).
+4. [1 minute] In `bench/`, run `python3 init.py`. This will create a SSH keypair and security groups in `east-1` and `east-2`. The script will ask you to enter your password to change the permissions on the SSH private key file (`~/.ssh/dory.pem`). You should only run this setup once, and do not need to repeat this step if you set up another cluster.
 
-To use our configuration scripts, make sure that you can access all of the instances using the same SSH key.
+5. [1 minute] In `bench/` run `python3 start_cluster.py`. This will create the EC2 instances for the experiments using the correct AMI and copy configuration files to each instance. Default TLS keys and certificates are included for testing. You do not need to change these to run evaluation benchmarks, but in a real deployment, these should be freshly generated for security.
 
-Also, make sure to configure security groups so that each machine can be accessed via SSH (port 22) and each machine can contact each other. For simplicity, you can create one security group that is very permissive and each instance is a part of.
-
-3. Open `system.config` locally. Update the `MasterAddr` field to be the IP address of `master`, `ClientAddr` to be an array containing the IP address of `client`, and the `Addr` field in the list of `Servers` to be the IP address of servers 1-8.
-
-Set `SSHKeyPath` to be the path to the SSH key used to access all the instances.
-
-Default TLS keys and certificates are included for testing. You do not need to change these to run evaluation benchmarks, but in a real deployment, these should be freshly generated for security.
-
-4. In `bench/`, run `python3 setup.py` locally. This will copy your local configuration to the EC2 instances you just created.
+6. When you are done with experiments (or just done for the day), run `python3 teardown_cluster.py` to terminate all the instances. 
 
 You've just finished setup! Follow the steps below to run experiments and reproduce our results.
-
-**Note**: If you restart your instances and they are assigned different IP addresses, you will need to run steps 3 and 4 again.
 
 ## Running experiments
 
@@ -50,7 +34,7 @@ To speed up testing, some of the experiments start with an index that is built b
 
 ### Table 7
 
-Run the experiment to collect the data for part of Table 7 showing the breakdown of search latency. For this experiment, you only need to have `server-1`, `server-2`, `master`, and `client` running. Run the following commands locally:
+Run the experiment to collect the data for the part of Table 7 showing the breakdown of search latency. For this experiment, you only need to have `server-1`, `server-2`, `master`, and `client` running. Run the following commands locally:
 
 ```
 cd bench

@@ -14,9 +14,9 @@ This prototype is released under the Apache v2 license (see [License](#license))
 
 3. [Up to 1 day for vCPU limit increase request] Request a vCPU limit of 128 for `east-1` and `east-2`.
 
-4. [1 minute] In `bench/`, run `python3 init.py`. This will create a SSH keypair and security groups in `east-1` and `east-2`. The script will ask you to enter your password to change the permissions on the SSH private key file (`~/.ssh/dory.pem`). You should only run this setup once, and do not need to repeat this step if you set up another cluster.
+4. [1 minute] Run `python3 init.py` in `bench/`. This will create a SSH keypair and security groups in `east-1` and `east-2`. The script will ask you to enter your password to change the permissions on the SSH private key file (`~/.ssh/dory.pem`). You should only run this setup once, and do not need to repeat this step if you set up another cluster (if you try to repeat this step, you will likely get error messages saying that the security key and/or security groups already exist).
 
-5. [1 minute] In `bench/` run `python3 start_cluster.py`. This will create the EC2 instances for the experiments using the correct AMI and copy configuration files to each instance. Default TLS keys and certificates are included for testing. You do not need to change these to run evaluation benchmarks, but in a real deployment, these should be freshly generated for security.
+5. [1 minute] Run `python3 start_cluster.py` in `bench/`. This will create the EC2 instances for the experiments using the correct AMI and copy configuration files to each instance. Default TLS keys and certificates are included for testing. You do not need to change these to run evaluation benchmarks, but in a real deployment, these should be freshly generated for security.
 
 6. When you are done with experiments (or just done for the day), run `python3 teardown_cluster.py` to terminate all the instances. 
 

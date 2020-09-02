@@ -2,11 +2,15 @@
 
 DORY is an encrypted search system that splits trust between multiple servers in order to efficiently hide access patterns from a malicious attacker who controls all but one of the servers. This implementation contains our DORY search protocol as described in the OSDI20 paper and does not include a complementary end-to-end encrypted filesystem that could use or interface with DORY.
 
+This implementation accompanies our paper "DORY: An Encrypted Search System with Distributed Trust" by Emma Dauterman, Eric Feng, Ellen Luo, Raluca Ada Popa, and Ion Stoica to appear at OSDI20
+
 **WARNING**: This is an academic proof-of-concept prototype and has not received careful code review. This implementation is NOT ready for production use.
 
 This prototype is released under the Apache v2 license (see [License](#license)).
 
 ## Setup
+
+For our experiments, we will use a cluster of AWS EC2 instances. Reviewers should have been provided with credentials to our AWS environment with compute resources.
 
 1. [2 minutes] Make sure python3 is downloaded. Then run the following:
 ```

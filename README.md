@@ -54,13 +54,13 @@ To validate the baseline results we used for the above figures, we show how to r
 
 Run the following commands to start the experiment:
 ```
-cd baseline
+cd bench 
 python3 start_baseline.py   # 1 minute
 ```
 
 This script starts the experiment and returns immediately. In approximately 70 minutes, retrieve the results by running: 
 ```
-cd baseline
+cd bench
 python3 get_baseline_results.py     # Run 70 minutes after start_baseline.py
 ```
 This will copy the output of the baseline experiments to `dory/baseline/out/oram_1024` and `dory/baseline/out/oram_2048`.

@@ -35,7 +35,7 @@ out = process.stdout.read()
 east11Config = json.loads(out)
 east11IDs = [instance["InstanceId"] for instance in east11Config["Instances"]]
 
-time.sleep(20)
+time.sleep(30)
 
 # first is master, next are servers 1, 3, 5, 7
 server1Addrs = []
@@ -68,7 +68,7 @@ out = process.stdout.read()
 east2Config = json.loads(out)
 east2IDs = [instance["InstanceId"] for instance in east2Config["Instances"]]
 
-time.sleep(20)
+time.sleep(30)
 
 # servers 2, 4, 6, 8
 server2Addrs = []
@@ -88,7 +88,7 @@ out = process.stdout.read()
 west1Config = json.loads(out)
 west1IDs = [instance["InstanceId"] for instance in west1Config["Instances"]]
 
-time.sleep(20)
+time.sleep(30)
 
 cmd = ('export AWS_DEFAULT_REGION=us-west-1; aws ec2 describe-instances --instance-ids "%s"') % (west1IDs[0])
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -105,7 +105,7 @@ out = process.stdout.read()
 west2Config = json.loads(out)
 west2IDs = [instance["InstanceId"] for instance in west2Config["Instances"]]
 
-time.sleep(20)
+time.sleep(30)
 
 cmd = ('export AWS_DEFAULT_REGION=us-west-2; aws ec2 describe-instances --instance-ids "%s"') % (west2IDs[0])
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -165,7 +165,7 @@ with open("../src/config/master.config", "w") as f:
     f.write(masterConfigBlob)
 
 # Wait for all instances to be fully started
-time.sleep(30)
+time.sleep(60)
 
 if sysConfig["MasterAddr"] != "127.0.0.1":
     cmd = ("scp -i %s -o StrictHostKeyChecking=no ../src/config/master.config ec2-user@%s:~/dory/src/config/master.config") % (sshKeyPath, sysConfig["MasterAddr"])
@@ -214,3 +214,5 @@ for i in range(len(sysConfig["ClientAddrs"])):
         process.wait()
 
 print("Cluster setup done.")
+print("--- Check that none of the scp commands above failed (SSH connection on port 22 was refused) ---")
+print("--- If one or more scp commands failed, teardown the cluster and start a new one ---")

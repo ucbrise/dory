@@ -23,7 +23,7 @@ pip3 install -r requirements.txt
 
 2. [5 minutes] Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) (version 2 works) and run `aws configure` using the instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) (use `json` as the default output format, and it does not matter what default region you choose).
 
-3. [2 minutes] To start a cluster, run the following:
+3. [3 minutes] To start a cluster, run the following:
 ```
 cd bench
 python3 start_cluster.py
@@ -51,6 +51,8 @@ With the exception of the baseline experiment, all experiments produce `.dat` fi
 The experiments for Table 7, Figures 8b-8c, and Figures 10-11 cannot be run concurrently. However, the experiments for the baseline can be run at the same time as the DORY experiments (we recommend doing this to save time, as the baseline experiments take a few hours to complete).
 
 To speed up testing, some of the experiments start with an index that is built by the server where the server has the keys to generate a correct search index. This configuration should only be used for testing (for security, only the client should have the keys).
+
+**Troubleshooting**: If for some reason an experiment hangs or crashes, this is likely due to a configuration error caused by a timing problem when starting the cluster (e.g. it tried to copy the configuration file to the instance before it was fully running). In this case, try tearing down the cluster, waiting a few minutes, and starting a new cluster.
 
 ### Baseline
 
@@ -142,6 +144,15 @@ Figure 11c:
 ## Test and play with functionality
 
 Outside of replicating our results, you can also run correctness tests and interactively search for keywords over a set of sample documents. You can do this remotely or locally.
+
+### Setting up AWS security groups and keypairs
+
+Our AWS environment for reviewers already has security groups and keypairs configured.
+To run DORY in another AWS environment, create security groups and keypairs by running:
+```
+cd bench
+python3 init.py
+```
 
 ### Building from source
 

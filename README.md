@@ -19,23 +19,7 @@ pip3 install -r requirements.txt
 
 2. [5 minutes] Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) and run `aws configure` using the instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) (use `json` as the default output format, and it does not matter what default region you choose).
 
-3. [Up to 1 day for vCPU limit increase request if necessary] Request a vCPU limit to satisfy the following requirements (if necessary):
-
-| Region | vCPU quantity |
-| -------|:-------------:|
-| `east-1` | 82 |
-| `east-2` | 64 |
-| `west-1` | 2 |
-| `west-2` | 16 |
-
-4. [1 minute] To initialize EC2 keypairs and security groups, run the following:
-```
-cd bench
-python3 init.py
-```
-This will create a SSH keypair and security groups in `east-1` and `east-2`. The script will ask you to enter your password to change the permissions on the SSH private key file (`~/.ssh/dory.pem`). You should only run this setup once, and do not need to repeat this step if you set up another cluster (if you try to repeat this step, you will likely get error messages saying that the security key and/or security groups already exist).
-
-5. [2 minutes] To start a cluster, run the following:
+3. [2 minutes] To start a cluster, run the following:
 ```
 cd bench
 python3 start_cluster.py
@@ -44,7 +28,7 @@ This will create the EC2 instances for the experiments using the correct AMI and
 
 Note: If you see a message that a SSH connection was refused on port 22, then the script was not able to copy over the configuration file because the instance had not fully started yet. In this case, either teardown the cluster and restart (waiting a few minutes between teardown and starting again), or manually copy the configuration files yourself using `scp`.
 
-6. When you are done with experiments (or just done for the day), run the following to terminate all instances:
+4. When you are done with experiments (or just done for the day), run the following to terminate all instances:
 ```
 cd bench
 python3 teardown_cluster.py

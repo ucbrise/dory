@@ -10,7 +10,7 @@ This prototype is released under the Apache v2 license (see [License](#license))
 
 ## Setup
 
-For our experiments, we will use a cluster of AWS EC2 instances. Reviewers should have been provided with credentials to our AWS environment with compute resources.
+For our experiments, we will use a cluster of AWS EC2 instances. Reviewers should have been provided with credentials to our AWS environment with compute resources. Reviewers should also have moved `dory.pem` (provided with submission) to `~/.ssh/` and set permissions to 400.
 
 1. [2 minutes] Make sure python3 is downloaded. Then run the following:
 ```

@@ -62,6 +62,7 @@ ax.set_xlabel("# Documents")
 ax.set_ylabel("Operations/sec")
 ax.set_xticks([1024, 32768, 1048576])
 ax.set_yticks([100, 1, 0.01, 0.0001])
+ax.set_title("10% U, 90% S")
 
 plt.legend()
 plt.tight_layout()

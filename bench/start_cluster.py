@@ -35,7 +35,7 @@ out = process.stdout.read()
 east11Config = json.loads(out)
 east11IDs = [instance["InstanceId"] for instance in east11Config["Instances"]]
 
-time.sleep(10)
+time.sleep(20)
 
 # first is master, next are servers 1, 3, 5, 7
 server1Addrs = []
@@ -68,7 +68,7 @@ out = process.stdout.read()
 east2Config = json.loads(out)
 east2IDs = [instance["InstanceId"] for instance in east2Config["Instances"]]
 
-time.sleep(10)
+time.sleep(20)
 
 # servers 2, 4, 6, 8
 server2Addrs = []
@@ -88,6 +88,8 @@ out = process.stdout.read()
 west1Config = json.loads(out)
 west1IDs = [instance["InstanceId"] for instance in west1Config["Instances"]]
 
+time.sleep(20)
+
 cmd = ('export AWS_DEFAULT_REGION=us-west-1; aws ec2 describe-instances --instance-ids "%s"') % (west1IDs[0])
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 out = process.stdout.read()
@@ -102,6 +104,8 @@ process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 out = process.stdout.read()
 west2Config = json.loads(out)
 west2IDs = [instance["InstanceId"] for instance in west2Config["Instances"]]
+
+time.sleep(20)
 
 cmd = ('export AWS_DEFAULT_REGION=us-west-2; aws ec2 describe-instances --instance-ids "%s"') % (west2IDs[0])
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -164,7 +168,7 @@ with open("../src/config/master.config", "w") as f:
 time.sleep(30)
 
 if sysConfig["MasterAddr"] != "127.0.0.1":
-    cmd = ("scp -i %s -o StrictHostKeyChecking=no $(PWD)/../src/config/master.config ec2-user@%s:~/dory/src/config/master.config") % (sshKeyPath, sysConfig["MasterAddr"])
+    cmd = ("scp -i %s -o StrictHostKeyChecking=no ../src/config/master.config ec2-user@%s:~/dory/src/config/master.config") % (sshKeyPath, sysConfig["MasterAddr"])
     process = subprocess.Popen(cmd, shell=True)
     process.wait()
 
@@ -185,7 +189,7 @@ for i in range(len(sysConfig["Servers"])):
         f.write(serverConfigBlob)
 
     if sysConfig["Servers"][i]["Addr"] != "127.0.0.1":
-        cmd = ("scp -i %s -o StrictHostKeyChecking=no $(PWD)/../src/config/server%d.config ec2-user@%s:~/dory/src/config/server%d.config") % (sshKeyPath, serverNum, sysConfig["Servers"][i]["Addr"], serverNum)
+        cmd = ("scp -i %s -o StrictHostKeyChecking=no ../src/config/server%d.config ec2-user@%s:~/dory/src/config/server%d.config") % (sshKeyPath, serverNum, sysConfig["Servers"][i]["Addr"], serverNum)
         process = subprocess.Popen(cmd, shell=True)
         process.wait()
 
@@ -205,7 +209,7 @@ with open("../src/config/client.config", "w") as f:
 for i in range(len(sysConfig["ClientAddrs"])):
 
     if sysConfig["ClientAddrs"][i] != "127.0.0.1":
-        cmd = ("scp -i %s -o StrictHostKeyChecking=no $(PWD)/../src/config/client.config ec2-user@%s:~/dory/src/config/client.config") % (sshKeyPath, sysConfig["ClientAddrs"][i])
+        cmd = ("scp -i %s -o StrictHostKeyChecking=no ../src/config/client.config ec2-user@%s:~/dory/src/config/client.config") % (sshKeyPath, sysConfig["ClientAddrs"][i])
         process = subprocess.Popen(cmd, shell=True)
         process.wait()
 

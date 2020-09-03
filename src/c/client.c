@@ -302,9 +302,9 @@ void checkColMACs(macArgs *args) {
         mac = mac ^ currMac;
     }
 
-    //if (mac != args->receivedMac) {
-//        printf("ERROR: MACs don't match\n");
-    //}
+    if (mac != args->receivedMac) {
+        printf("ERROR: MACs don't match\n");
+    }
 
 }
 

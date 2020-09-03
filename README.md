@@ -75,7 +75,8 @@ Compare the reported search latency to the search latency points in Figure 8b, o
 
 ### Table 7
 
-Run the experiment to collect the data for the part of Table 7 showing the breakdown of search latency. For this experiment, you only need to have `server-1`, `server-2`, `master`, and `client` running. Run the following commands locally:
+Run the experiment to collect the data for the part of Table 7 showing the breakdown of search latency.
+Run the following commands locally:
 
 ```
 cd bench
@@ -88,7 +89,8 @@ This will produce data closely matching the left half of Table 7 on page 10 of t
 
 ### Figures 8b-8c
 
-Run the experiment and then plot the data for Figures 8b and 8c showing the effect of parallelism on search latency as the number of documents increases. For this experiment, you need all instances except `baseline-client` and `baseline-server` running (so `server-1`-`server-8`, `master`, and `client`). Run the following commands locally:
+Run the experiment and then plot the data for Figures 8b and 8c showing the effect of parallelism on search latency as the number of documents increases.
+Run the following commands locally:
 
 ```
 cd bench
@@ -107,7 +109,8 @@ Figure 8c:
 
 ### Figures 10-11
 
-Run the experiment and then plot the data for Figures 10 and 11 showing the effect of parallelism on throughput as the number of documents increases for different workloads. For this experiment, you need all instances except `baseline-client` and `baseline-server` running (so `server-1`-`server-8`, `master`, and `client`). Run the following commands locally:
+Run the experiment and then plot the data for Figures 10 and 11 showing the effect of parallelism on throughput as the number of documents increases for different workloads.
+Run the following commands locally:
 
 ```
 cd bench
@@ -185,9 +188,11 @@ For example, to start test DORY on a single machine (with two servers), use the 
 ./runClient.sh
 ```
 
-Without any flags set, the client will load all the documents in `sample_docs` (a very smal subset of the Enron email dataset) into the search index and then provide prompts for the user to enter keywords to search for.
+Without any flags set, the client will load all the documents in `sample_docs` (a very smal subset of the Enron email dataset) into the search index and then provide prompts for the user to enter keywords to search for. DORY performs keyword search with stemming (no support for regular expressions).
 
 Make sure to always set the Bloom filter size and the max number of documents the same across the master, servers, and clients. The only exception is when running with cluster sizes greater than 1; in this case, every entity should use the same Bloom filter size, the master and client should use the correct maximum number of documents, and the servers should use the maximum  number of documents divided by the number of clusters. To run with multiple clusters, you will need a number of servers equal to 2 times the number of clusters.
+
+Make sure to restart the master and servers whenever you restart the client.
 
 ### Tests
 To test the low-level crypto, run `make` in `src/c` and run `correctness_tests`. To test the end-to-end system, run the client with the correctness test flag set to true (`-c`).

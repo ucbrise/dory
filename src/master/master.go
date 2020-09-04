@@ -104,6 +104,8 @@ func start2PC(version int, updateMapCopy map[int]common.Update) {
         }(i)
     }
 
+    wg1.Wait()
+
     finishReq := &common.BatchFinishRequest{
         Commit:     finalCommit,
     }

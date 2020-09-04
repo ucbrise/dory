@@ -6,7 +6,6 @@ from benchClient import cleanupForDoryMixedThroughput
 bloomFilterSzList = [1120, 1280, 1440, 1600, 1800, 2000, 2240, 2520, 2800, 3120, 3480]
 
 tickMs = 10000 
-#clientS = 10 
 clientS = 60 
 
 threads = 10
@@ -36,6 +35,7 @@ def runExperimentRound(numClusters):
         print("-------------------------")
         f91.write(str(throughput) + "\n")
 
+        
         numUpdates =5 
         numSearches = 5
         print(("5/5 for %d clusters, %d docs") % (numClusters, numDocs))
@@ -51,6 +51,7 @@ def runExperimentRound(numClusters):
         f19.write(str(throughput) + "\n")
 
         cleanupForDoryMixedThroughput(servers)
+        
 
     f91.close()
     f55.close()

@@ -3,11 +3,20 @@ import subprocess
 import benchClient
 
 regionAMIs = { 
+        "us-east-1": "ami-0313472d535df8cfd",
+        "us-east-2": "ami-0eb2012f23aeda71a",
+        "us-west-1": "ami-01312f0ad647427de",
+        "us-west-2": "ami-01240c2bd44b025ee",
+        }   
+
+'''
+regionAMIs = { 
         "us-east-1": "ami-034fd6e677d79ebb5",
         "us-east-2": "ami-0f972c03390d700fb",
         "us-west-1": "ami-063ff9879f81ae1c1",
         "us-west-2": "ami-0fb4b87cd10b60c95",
         }   
+'''
 
 def runSetup():
     

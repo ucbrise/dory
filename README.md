@@ -48,7 +48,7 @@ The experimental results in this paper compare DORY to a PathORAM baseline in `b
 
 With the exception of the baseline experiment, all experiments produce `.dat` files with raw data in `bench/out` and figures corresponding to the ones in the paper as `.png` files in `bench/out`. The corresponding raw data and figures we produced for the paper are in `bench/ref` for comparison.
 
-The experiments for Table 7, Figures 8b-8c, and Figures 10-11 cannot be run concurrently. However, the experiments for the baseline can be run at the same time as the DORY experiments (we recommend doing this to save time, as the baseline experiments take a few hours to complete).
+The experiments for Table 7, Figures 8b-8c, and Figures 10-11 cannot be run concurrently. However, the experiments for the baseline can be run at the same time as the DORY experiments (we recommend doing this to save time, as the baseline experiments take over an hour to complete).
 
 To speed up testing, some of the experiments start with an index that is built by the server where the server has the keys to generate a correct search index. This configuration should only be used for testing (for security, only the client should have the keys).
 
@@ -56,7 +56,7 @@ To speed up testing, some of the experiments start with an index that is built b
 
 ### Baseline
 
-To validate the baseline results we used for the above figures, we show how to reproduce our baseline results for 1,024 and 2,048 documents. This process takes several hours (whereas collecting all the data points takes approximately a week).
+To validate the baseline results we used for the above figures, we show how to reproduce our baseline results for 1,024 and 2,048 documents. This process takes just over an hour (whereas collecting all the data points takes approximately a week).
 
 Run the following commands to start the experiment:
 ```
@@ -180,7 +180,7 @@ You can then start the master, servers, and client on your local machine.
 ### Running DORY 
 Start the master by running `runMaster.sh`, the servers by running `runServer.sh` and the client by running `runClient.sh`. Each script has a number of flags that can be set; run the scripts with `-h` to see all the flags.
 
-For example, to start test DORY on a single machine (with two servers), use the default config files and run:
+For example, to start DORY on a single machine (with two servers), use the default config files and run:
 ```
 ./runMaster.sh
 ./runServer.sh -s 1

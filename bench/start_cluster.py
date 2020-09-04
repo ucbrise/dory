@@ -3,11 +3,20 @@ import subprocess
 import benchClient
 
 regionAMIs = { 
+        "us-east-1": "ami-0b681a8de0adaacd4",
+        "us-east-2": "ami-069cebb3bfa642d7b",
+        "us-west-1": "ami-0ee9016b3e8b02616",
+        "us-west-2": "ami-051ce46f23c7611f2",
+        }  
+
+'''
+regionAMIs = { 
         "us-east-1": "ami-034fd6e677d79ebb5",
         "us-east-2": "ami-0f972c03390d700fb",
         "us-west-1": "ami-063ff9879f81ae1c1",
         "us-west-2": "ami-0fb4b87cd10b60c95",
         }  
+'''
 
 filename = "../system.config"
 

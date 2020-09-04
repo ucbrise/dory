@@ -380,7 +380,7 @@ void updateClientState(client *c, int numDocs, uint32_t *versions) {
     NUM_DOCS = numDocs;
     NUM_DOCS_BYTES = ceil(((double) NUM_DOCS) / 8.0);
     MALICIOUS_DPF_LEN = NUM_DOCS_BYTES + MAC_BYTES;
-    if (versions != NULL) {
+/*    if (versions != NULL) {
         memcpy(c->versions, versions, MAX_DOCS * sizeof(uint32_t));
-    }
+    }*/
 }

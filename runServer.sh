@@ -27,6 +27,9 @@ while getopts ":h?:d:n:t:b:s:c:" opt; do
         c)
             correct=$OPTARG
             ;;
+        m)
+            malicious=$OPTARG
+            ;;
     esac        
 done    
 

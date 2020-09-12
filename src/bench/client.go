@@ -5,6 +5,7 @@ package main
 import (
     "bufio"
     "client"
+    "common"
     "log"
     "flag"
     "os"
@@ -13,6 +14,7 @@ import (
     "time"
     "sync"
     "strconv"
+    "math/rand"
 )
 
 /* Run correctness tests. */
@@ -171,14 +173,18 @@ func runInteractiveSearches(configFile string, numDocs int, bloomFilterSz int, i
 }
 
 /* Run search latency benchmark without parallelism, including time breakdown. */
-func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, isMalicious bool, fastSetup bool, useMaster bool, latencyPrints bool) {
+func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, isMalicious bool, isLeaky bool, isPlaintext bool, fastSetup bool, useMaster bool, latencyPrints bool) {
     /* Initialize client */
 
     numTrials := 1
 
     log.Println("Initializing client...")
     outFile := client.Setup(configFile, bloomFilterSz, numDocs)
-    conn := client.OpenConnection()
+    var conn *common.Conn
+
+    if (useMaster && !isPlaintext) {
+        conn = client.OpenConnection()
+    }
 
     if (fastSetup) {
         client.RunFastSetup("", useMaster);
@@ -186,6 +192,8 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
         for i := 0; i < numDocs; i++ {
             if (isMalicious) {
                 client.UpdateDoc_malicious(conn, []string{"hello", "world"}, i, useMaster)
+            } else if (isPlaintext) {
+                client.UpdateDoc_plaintext([]string{"hello", "world"}, i)
             } else {
                 client.UpdateDoc_semihonest(conn, []string{"hello", "world"}, i, useMaster)
             }
@@ -208,7 +216,11 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
             serverMs += float64(t4.Nanoseconds())/float64(1e6)
             clientMs += float64(t2.Nanoseconds())/float64(1e6) + float64(t5.Nanoseconds())/float64(1e6)
             networkMs = float64(t3.Nanoseconds())/float64(1e6) - serverMs
-        } else {
+        } else if (isLeaky) {
+            _, err = client.SearchKeyword_leaky(conn, "hello", useMaster)
+        } else if (isPlaintext) {
+            _, err = client.SearchKeyword_plaintext("hello")
+        }else {
             _, err = client.SearchKeyword_semihonest(conn, "hello", useMaster)
         }
     }
@@ -254,22 +266,29 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
     } else {
         log.Printf("Completed search in %f ms\n", timeMs);
     }
-    client.CloseConnection(conn)
+    if (useMaster && !isPlaintext) {
+        client.CloseConnection(conn)
+    }
     client.Cleanup()
 }
 
 /* Measure update latency using documents from directory. */
-func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, numDocs int, isMalicious bool, useMaster bool) {
+func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, numDocs int, isMalicious bool, isPlaintext bool, useMaster bool) {
     topDirs, err := ioutil.ReadDir(benchmarkDir)
     if err != nil {
         log.Fatal(err)
     }
-    totalIterations := 1000
+    //totalIterations := 1000
 
     /* Initialize client */
     log.Println("Initializing client...")
     outFile := client.Setup(configFile, bloomFilterSz, numDocs)
-    conn := client.OpenConnection()
+
+    var conn *common.Conn
+
+    if (useMaster && !isPlaintext) {
+        conn = client.OpenConnection()
+    }
 
     log.Println("Completed setup.")
 
@@ -285,25 +304,27 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
                 filename := benchmarkDir + "/" + topDir.Name() + "/" + midDir.Name() + "/" + file.Name()
                 if (isMalicious) {
                     err = client.UpdateDocFile_malicious(conn, filename, docID, useMaster)
-                } else {
+                } else if (isPlaintext) {
+                    err = client.UpdateDocFile_plaintext(filename, docID)
+                }else {
                     err = client.UpdateDocFile_semihonest(conn, filename, docID, useMaster)
                 }
                 ctr += 1
                 if err != nil {
                     log.Fatal(err)
                 }
-                if ctr >= totalIterations {
+                /*if ctr >= totalIterations {
                     break
-                }
+                }*/
             }
-            if ctr >= totalIterations {
+            /*if ctr >= totalIterations {
                 break
-            }
+            }*/
             log.Println("Finished: ", topDir.Name() + "/" + midDir.Name())
         }
-        if ctr >= totalIterations {
+        /*if ctr >= totalIterations {
             break
-        }
+        }*/
     }
     elapsed := float64(time.Since(start).Nanoseconds())/float64(1e6)/float64(ctr)
 
@@ -323,7 +344,9 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
     log.Printf("%s\n", strconv.FormatFloat(elapsed, 'f', 3, 64))
 
     /* Clean up */
-    client.CloseConnection(conn)
+    if (useMaster && !isPlaintext) {
+        client.CloseConnection(conn)
+    }
     client.Cleanup()
 }
 
@@ -336,7 +359,7 @@ func runFastSetup(configFile string, numDocs int, bloomFilterSz int, useMaster b
 }
 
 /* Run throughput benchmarks with  mix of updates and searches with multiple clusters. */
-func runThroughputClustersBenchmark(configFile string, numDocs int, bloomFilterSz int, useMaster bool, seconds int, threads int, numUpdates int, numSearches int, numClusters int) {
+func runThroughputClustersBenchmark(configFile string, numDocs int, bloomFilterSz int, isMalicious bool, leaky bool, isPlaintext bool, useMaster bool, seconds int, threads int, numUpdates int, numSearches int, numClusters int) {
     /* Initialize client */
     log.Println("Initializing client...")
     outFile := client.Setup(configFile, bloomFilterSz, numDocs)
@@ -351,8 +374,11 @@ func runThroughputClustersBenchmark(configFile string, numDocs int, bloomFilterS
         go func(index int) {
             defer wg.Done()
             tick := time.Tick(duration)
-            conn := client.OpenConnection()
-            defer client.CloseConnection(conn)
+            var conn *common.Conn
+            if (useMaster && !isPlaintext) {
+                conn := client.OpenConnection()
+                defer client.CloseConnection(conn)
+            }
             j := index * slice
             updateCtr := 0
             searchCtr := numSearches    // start with updates
@@ -365,13 +391,31 @@ func runThroughputClustersBenchmark(configFile string, numDocs int, bloomFilterS
                     }
                 default:
                     if (updateCtr < numUpdates) {
-                        client.DummyUpdateDoc_malicious(conn, []string{"hello", "world"}, (j % numDocs), useMaster)
+                        if (isMalicious) {
+                            client.DummyUpdateDoc_malicious(conn, []string{"hello", "world"}, (j % numDocs), useMaster)
+                        } else if (isPlaintext) {
+                            docID := (j % 128) + 1
+                            client.UpdateDocFile_plaintext("sample_docs/" + string(docID), docID)
+                        } else {
+                            client.DummyUpdateDoc_semihonest(conn, []string{"hello", "world"}, (j % numDocs), useMaster)
+                        }
                         updateCtr += 1
                         if (updateCtr == numUpdates) {
                             searchCtr = 0
                         }
                     } else if (searchCtr < numSearches) {
-                        client.SearchKeyword_malicious_parallel(conn, "hello", useMaster, 1)
+                        if (isMalicious) {
+                            log.Println("is malicious")
+                            client.SearchKeyword_malicious_parallel(conn, "hello", useMaster, numClusters)
+                        } else if (leaky) {
+                            client.SearchKeyword_leaky(conn, "hello", useMaster)
+                        } else if (isPlaintext) {
+                            keywords := client.GetKeywordsFromFile("sample_docs/" + string((j % 128) + 1))
+                            keyword := keywords[rand.Intn(len(keywords))]
+                            client.SearchKeyword_plaintext(keyword)
+                        } else {
+                            client.SearchKeyword_semihonest(conn, "hello", useMaster)
+                        }
                         searchCtr += 1
                         if (searchCtr == numSearches) {
                             updateCtr = 0
@@ -466,7 +510,7 @@ func runThroughputBenchmark(configFile string, numDocs int, bloomFilterSz int, i
 
     tag := ""
     if (isMalicious)  {
-        tag = "malicious_numUupdates"
+        tag = "malicious_numUpdates"
     } else {
         tag = "semihonest_numUpdates"
     }
@@ -497,6 +541,8 @@ func main() {
     updateBench := flag.Bool("update_bench", false, "run update bnehcmarks")
     bloomFilterSz := flag.Int("bf_sz", 128, "bloom filter size in bits")
     isMalicious := flag.Bool("malicious", true, "run with malicious checks")
+    leaky := flag.Bool("leaky", false, "run leaky version (no DPFs)")
+    plaintext := flag.Bool("plaintext", false, "run plaintext version of search")
     fastSetup := flag.Bool("fast_setup", true, "run fast setup (ONLY TESTING)")
     useMaster := flag.Bool("use_master", true, "use a master for batched updates")
     runThroughput := flag.Bool("throughput", false, "run thorughput benchmarks")
@@ -518,14 +564,13 @@ func main() {
     }else if (*runThroughput && *numClusters == 0) {
         runThroughputBenchmark(*filename, *numDocs, *bloomFilterSz, *isMalicious, *useMaster, *throughputSec, *throughputThreads, *numUpdates, *numSearches)
     } else if (*runThroughput && *numClusters > 0) {
-        runThroughputClustersBenchmark(*filename, *numDocs, *bloomFilterSz, *useMaster, *throughputSec, *throughputThreads, *numUpdates, *numSearches, *numClusters)
-
+        runThroughputClustersBenchmark(*filename, *numDocs, *bloomFilterSz, *isMalicious, *leaky, *plaintext, *useMaster, *throughputSec, *throughputThreads, *numUpdates, *numSearches, *numClusters)
+    } else if (*updateBench) {
+        runDirBenchmark(*filename, *benchmarkDir, *bloomFilterSz, *numDocs, *isMalicious, *plaintext, *useMaster)
+    } else if (*latencyBench) {
+        runArtificialBenchmark(*filename, *numDocs, *bloomFilterSz, *isMalicious, *leaky, *plaintext, *fastSetup, *useMaster, *latencyPrints)
     } else if (*numClusters > 0) {
         runParallelBenchmark(*filename, *numDocs, *bloomFilterSz, *useMaster, *numClusters)
-    }else if (*updateBench) {
-        runDirBenchmark(*filename, *benchmarkDir, *bloomFilterSz, *numDocs, *isMalicious, *useMaster)
-    } else if (*latencyBench) {
-        runArtificialBenchmark(*filename, *numDocs, *bloomFilterSz, *isMalicious, *fastSetup, *useMaster, *latencyPrints)
     } else {
         runInteractiveSearches(*filename, *numDocs, *bloomFilterSz, *isMalicious, *useMaster, *benchmarkDir)
     }

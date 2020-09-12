@@ -122,6 +122,26 @@ func handleConnection(conn net.Conn) {
                 log.Fatalln(err)
             }
 
+       case common.SEARCH_REQUEST_LEAKY:
+            var req common.SearchRequest_leaky
+            if err := dec.Decode(&req); err != nil {
+                log.Fatalln(err)
+            }
+            start := time.Now()
+            resp, respErr := searchKeyword_leaky(req)
+            elapsed := time.Since(start)
+            resp.ServerLatency = elapsed
+            logLatency(elapsed, "leaky")
+            if err := enc.Encode(&respErr); err != nil {
+                log.Fatalln(err)
+            }
+            if err := enc.Encode(&resp); err != nil {
+                log.Fatalln(err)
+            }
+            if err := w.Flush(); err != nil {
+                log.Fatalln(err)
+            }
+
         case common.UPDATE_REQUEST_MALICIOUS:
             var req common.UpdateRequest_malicious
             if err := dec.Decode(&req); err != nil {
@@ -339,6 +359,47 @@ func searchKeyword_semihonest(req common.SearchRequest_semihonest) (common.Searc
 
     return resp, nil
 }
+
+/* Process search request (semihonest adversaries). */
+func searchKeyword_leaky(req common.SearchRequest_leaky) (common.SearchResponse_leaky, error) {
+    var s *C.server = sNew
+    if (req.Version == newVersionNum) {
+        s = sNew
+    } else if (req.Version == oldVersionNum) {
+        s =  sOld
+    }  else {
+        log.Println("Unknown version number: ", req.Version)
+    }
+
+    cResults := (**C.uint8_t)(C.malloc(C.size_t(C.BLOOM_FILTER_K) * C.size_t(unsafe.Sizeof(&req))))
+    cResultsIndexable := (*[1<<30 - 1]*C.uint8_t)(unsafe.Pointer(cResults))
+
+   cCols := (*C.uint32_t)(C.malloc(C.size_t(C.BLOOM_FILTER_K) * C.size_t(unsafe.Sizeof(C.uint32_t(1)))))
+    cColsIndexable := (*[1<<30 - 1]C.uint32_t)(unsafe.Pointer(cCols))
+
+    for i := 0; i < int(C.BLOOM_FILTER_K); i++ {
+        cResultsIndexable[i] = (*C.uint8_t)(C.malloc((C.size_t(C.NUM_DOCS_BYTES))))
+        cColsIndexable[i] = C.uint32_t(req.Cols[i])
+    }
+
+    C.runQuery_leaky((*C.server)(s),
+                    (*C.uint32_t)(cCols),
+                    (**C.uint8_t)(cResults))
+
+    results := make([][]byte, C.int(C.BLOOM_FILTER_K))
+
+    for i := 0; i < int(C.BLOOM_FILTER_K); i++ {
+        results[i] = C.GoBytes(unsafe.Pointer(cResultsIndexable[i]), C.int(C.NUM_DOCS_BYTES))
+    }
+
+    resp := common.SearchResponse_leaky{
+        Results: results,
+    }
+
+    return resp, nil
+}
+
+
 
 /* Only called directly if not using the master; for updating documents (malicious adversaries). */
 func updateDoc_malicious(req common.UpdateRequest_malicious) (common.UpdateResponse_malicious, error) {

@@ -3,6 +3,7 @@ correct="false"
 bf_sz="1024"
 num_docs="128"
 malicious="true"
+leaky="false"
 fast_setup="true"
 use_master="true"
 throughput="false"
@@ -15,14 +16,17 @@ only_setup="false"
 latency_prints="false"
 latency_bench="false"
 update_bench="false"
+plaintext="false"
 
-while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:l:a:u:" opt; do
+while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:l:a:u:g:i:" opt; do
     case "$opt" in
         h|\?)
             echo -e "\nArguments: "
             echo -e "-b \t\t Bits in Bloom filter (default 1120)"
             echo -e "-n \t\t Max number of documents (default 1024)"
             echo -e "-m \t\t Malicious security? (default true)"
+            echo -e "-g \t\t Leaky search (no DPFs)? (default false)"
+            echo -e "-i \t\t Plaintext search? (default false)"
             echo -e "-s \t\t Run with master? (default true)"
             echo -e "-p \t\t Number of clusters (default 1)"
             echo -e "\nBenchmarking/testing arguments: "
@@ -91,10 +95,16 @@ while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:l:a:u:" opt; do
         u) update_bench=$OPTARG
             ;;
 
+        g) leaky=$OPTARG
+            ;;
+
+        i) plaintext=$OPTARG
+            ;;
+
     esac
 done
 
-echo "bench_dir='$bench_dir', tests='$correct', bf_sz='$bf_sz', num_docs='$num_docs'"
+echo "bench_dir='$bench_dir', tests='$correct', bf_sz='$bf_sz', num_docs='$num_docs', malicious='$malicious'"
 
-CGO_CFLAGS="-I./libsolv-sys/src -D LIBSOLV_INTERNAL -w" CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/bench/client.go --config=src/config/client.config --test="$correct" --bench_dir="$bench_dir" --bf_sz="$bf_sz" --num_docs="$num_docs" --malicious="$malicious" --fast_setup="$fast_setup" --use_master="$use_master" --throughput="$throughput" --throughput_sec="$throughput_sec" --throughput_threads="$throughput_threads" --num_updates="$num_updates" --num_searches="$num_searches" --num_clusters="$num_clusters" --only_setup="$only_setup" --latency_prints="$latency_prints" --latency_bench="$latency_bench" --update_bench="$update_bench"
+CGO_CFLAGS="-I./libsolv-sys/src -D LIBSOLV_INTERNAL -w" CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/bench/client.go --config=src/config/client.config --test="$correct" --bench_dir="$bench_dir" --bf_sz="$bf_sz" --num_docs="$num_docs" --malicious="$malicious" --fast_setup="$fast_setup" --use_master="$use_master" --throughput="$throughput" --throughput_sec="$throughput_sec" --throughput_threads="$throughput_threads" --num_updates="$num_updates" --num_searches="$num_searches" --num_clusters="$num_clusters" --only_setup="$only_setup" --latency_prints="$latency_prints" --latency_bench="$latency_bench" --update_bench="$update_bench" --leaky="$leaky" --plaintext="$plaintext"
 

@@ -191,7 +191,6 @@ func DummyUpdateDoc_malicious(conn *common.Conn, keywords []string, docID int, u
     return nil
 }
 
-/* Generate update (semihonest adversaries). */
 func UpdateDoc_semihonest(conn *common.Conn, keywords []string, docID int, useMaster bool) error {
     /* Convert []string to **char */
     cKeywords := C.malloc(C.size_t(len(keywords)) * C.size_t(common.MAX_KEYWORD_SIZE))
@@ -255,6 +254,22 @@ func UpdateDoc_semihonest(conn *common.Conn, keywords []string, docID int, useMa
     /* Free allocated memory */
     C.free(cKeywords)
     C.free(buf)
+    return nil
+}
+
+/* Generate update (semihonest adversaries). */
+func UpdateDoc_plaintext(keywords []string, docID int) error {
+
+    req := &common.UpdateRequest_plaintext{
+        DocID: docID,
+        Keywords: keywords,
+    }
+
+    common.SendMessageNoResp(
+        config.Addr[0] + config.Port[0],
+        common.UPDATE_REQUEST_PLAINTEXT,
+        req,
+    )
     return nil
 }
 
@@ -332,6 +347,12 @@ func UpdateDocFile_malicious(conn *common.Conn, filename string, docID int, useM
 func UpdateDocFile_semihonest(conn *common.Conn, filename string, docID int, useMaster bool) error {
     keywords := GetKeywordsFromFile(filename)
     return UpdateDoc_semihonest(conn, keywords, docID, useMaster)
+}
+
+/* Update document, tokenizing words from file (plaintext). */
+func UpdateDocFile_plaintext(filename string, docID int) error {
+    keywords := GetKeywordsFromFile(filename)
+    return UpdateDoc_plaintext(keywords, docID)
 }
 
 func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) ([]byte, error, time.Duration, time.Duration, time.Duration, time.Duration, time.Duration) {
@@ -593,7 +614,6 @@ func SearchKeyword_semihonest(conn *common.Conn, keyword string, useMaster bool)
         keys1[i] = C.GoBytes(unsafe.Pointer(cKeys1Indexable[i]), C.int(C.getDPFKeyLen()))
         keys2[i] = C.GoBytes(unsafe.Pointer(cKeys2Indexable[i]), C.int(C.getDPFKeyLen()))
     }
-    log.Println("version: ", versionNum)
     req1 := &common.SearchRequest_semihonest{
         Keys: keys1,
         Version: versionNum,
@@ -651,6 +671,72 @@ func SearchKeyword_semihonest(conn *common.Conn, keyword string, useMaster bool)
     docsPresent := C.GoBytes(cDocsPresent, C.int(C.NUM_DOCS_BYTES))
 
     return docsPresent, nil
+}
+
+/* Run search (semihonest adversaries). */
+func SearchKeyword_leaky(conn *common.Conn, keyword string, useMaster bool) ([]byte, error) {
+    if (useMaster) {
+        GetState(conn);
+    }
+    
+    cIndexes := C.malloc(C.size_t(C.BLOOM_FILTER_K) * C.size_t(unsafe.Sizeof((C.uint32_t)(1))))
+  
+    cResults := C.malloc(C.size_t(C.BLOOM_FILTER_K) * C.size_t(unsafe.Sizeof(&keyword)))
+    cResultsIndexable := (*[1<<30 - 1]*C.uint8_t)(unsafe.Pointer(cResults))
+    cIndexesIndexable := (*[1<<30 - 1]C.uint32_t)(unsafe.Pointer(cIndexes))
+
+    clientLock.Lock()
+    C.getIndexesForKeyword((*C.client)(c),
+                           (*C.uint32_t)(cIndexes),
+                           C.CString(keyword))
+    clientLock.Unlock()
+
+    cols := make([]uint32, int(C.BLOOM_FILTER_K))
+
+    for i := 0; i < int(C.BLOOM_FILTER_K); i++ {
+        cols[i] = uint32(cIndexesIndexable[i])
+    }
+    req := &common.SearchRequest_leaky{
+        Cols: cols,
+        Version: versionNum,
+    }
+
+    resp := &common.SearchResponse_leaky{}
+    var respError error
+    common.SendMessage(
+            config.Addr[0] + config.Port[0],
+            common.SEARCH_REQUEST_LEAKY,
+            req,
+            resp,
+            &respError,
+        )
+
+    for i := 0; i < int(C.BLOOM_FILTER_K); i++ {
+       cResultsIndexable[i] = (*C.uint8_t)(C.CBytes(resp.Results[i]))
+    }
+    
+
+    docsPresent := C.GoBytes(cResults, C.int(C.NUM_DOCS_BYTES))
+
+    return docsPresent, nil
+}
+
+func SearchKeyword_plaintext(keyword string) ([]int, error) {
+    req := &common.SearchRequest_plaintext{
+        Keyword: keyword,
+    }
+
+    resp := &common.SearchResponse_plaintext{}
+    var respError error
+    common.SendMessage(
+            config.Addr[0] + config.Port[0],
+            common.SEARCH_REQUEST_PLAINTEXT,
+            req,
+            resp,
+            &respError,
+        )
+
+    return resp.Results, nil
 }
 
 func RunFastSetup(benchmarkDir string, useMaster bool) error {

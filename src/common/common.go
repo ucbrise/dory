@@ -78,6 +78,15 @@ type SearchRequest_semihonest struct {
     Version     int
 }
 
+type SearchRequest_leaky struct {
+    Cols        []uint32
+    Version     int
+}
+
+type SearchRequest_plaintext struct {
+    Keyword        string
+}
+
 type SearchResponse_malicious struct {
     Results         [][]byte
     ServerLatency   time.Duration
@@ -85,6 +94,16 @@ type SearchResponse_malicious struct {
 
 type SearchResponse_semihonest struct {
     Results         [][]byte
+    ServerLatency   time.Duration
+}
+
+type SearchResponse_leaky struct {
+    Results         [][]byte
+    ServerLatency   time.Duration
+}
+
+type SearchResponse_plaintext struct {
+    Results         []int
     ServerLatency   time.Duration
 }
 
@@ -101,11 +120,24 @@ type UpdateRequest_semihonest struct {
     BF              []byte
 }
 
+type UpdateRequest_plaintext struct {
+    DocID           int
+    Keywords        []string
+}
+
 type UpdateResponse_malicious struct {
     Test            string
 }
 
 type UpdateResponse_semihonest struct {
+    Test            string
+}
+
+type UpdateResponse_leaky struct {
+    Test            string
+}
+
+type UpdateResponse_plaintext struct {
     Test            string
 }
 
@@ -159,8 +191,11 @@ type GetStateResponse struct {
 const (
     SEARCH_REQUEST_MALICIOUS uint8 = iota
     SEARCH_REQUEST_SEMIHONEST
+    SEARCH_REQUEST_LEAKY
+    SEARCH_REQUEST_PLAINTEXT
     UPDATE_REQUEST_MALICIOUS
     UPDATE_REQUEST_SEMIHONEST
+    UPDATE_REQUEST_PLAINTEXT
     SETUP_REQUEST
     GET_STATE_REQUEST
     BATCH_START_REQUEST

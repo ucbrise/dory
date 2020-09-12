@@ -20,6 +20,8 @@ void printServer(server *s);
 void setRow(server *s, int i, uint8_t *bf);
 int runQuery(server *s, unsigned char *keys[], uint8_t **results, int threadNum, int startIndex, int endIndex);
 
+int runQuery_leaky(server *s, uint32_t *indexes, uint8_t **results);
+
 int setRow_malicious(server *s, int i, uint8_t *bf, uint128_t *macs);
 int runQuery_malicious(server *s, unsigned char *keys[], uint8_t **results, int threadNum, int startIndex, int endIndex);
 int assemblePerThreadResults(server *s, uint8_t ***in, int numThreads, uint8_t **out);

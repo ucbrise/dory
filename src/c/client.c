@@ -124,7 +124,7 @@ int getIndexesForKeyword(client *c, uint32_t indexes[], char *keyword) {
     CHECK_A (tmp = malloc(4 * BLOOM_FILTER_K + 1));
     CHECK_C (hashToBytes(tmp, 4 * BLOOM_FILTER_K + 1, keyword, strlen(keyword)));
     uint8_t base = tmp[4 * BLOOM_FILTER_K] % (uint8_t)(ceil((double)BLOOM_FILTER_SZ / BLOCK_SZ));
-    uint8_t modValue = min(BLOOM_FILTER_SZ, BLOCK_SZ);
+    uint8_t modValue = (base == ceil((double)BLOOM_FILTER_SZ / BLOCK_SZ) - 1) ? BLOOM_FILTER_SZ % BLOCK_SZ : min(BLOOM_FILTER_SZ, BLOCK_SZ);
     for (int i = 0; i < BLOOM_FILTER_K; i++) {
         indexes[i] = (tmp[0 + 4 * i] << 24) + (tmp[1 + 4 * i] << 16) + (tmp[2 + 4 * i] << 8) + (tmp[3 + 4 * i]); // big-endian
         indexes[i] = (indexes[i] % modValue) + (base * BLOCK_SZ);

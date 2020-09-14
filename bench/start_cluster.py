@@ -3,18 +3,18 @@ import subprocess
 import benchClient
 
 regionAMIs = { 
-        "us-east-1": "ami-0313472d535df8cfd",
-        "us-east-2": "ami-0eb2012f23aeda71a",
+        "us-east-1": "ami-0fe9b8907528dcfde",
+        "us-east-2": "ami-0de294a306a31d703",
         "us-west-1": "ami-01312f0ad647427de",
         "us-west-2": "ami-01240c2bd44b025ee",
         }  
 
 '''
 regionAMIs = { 
-        "us-east-1": "ami-034fd6e677d79ebb5",
-        "us-east-2": "ami-0f972c03390d700fb",
-        "us-west-1": "ami-063ff9879f81ae1c1",
-        "us-west-2": "ami-0fb4b87cd10b60c95",
+        "us-east-1": "ami-0313472d535df8cfd",
+        "us-east-2": "ami-0eb2012f23aeda71a",
+        "us-west-1": "ami-01312f0ad647427de",
+        "us-west-2": "ami-01240c2bd44b025ee",
         }  
 '''
 
@@ -90,6 +90,7 @@ for i in range(len(east2IDs)):
 
 print("Created all us-east-2 instances")
 
+'''
 # US-WEST-1
 cmd = ('export AWS_DEFAULT_REGION=us-west-1; aws ec2 run-instances --image-id %s --count 1 --instance-type c5.large --key-name DoryKeyPair --placement "{\\\"AvailabilityZone\\\": \\\"us-west-1b\\\"}" --security-groups DoryGroup') % (regionAMIs["us-west-1"])
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -123,7 +124,7 @@ c = json.loads(out)
 baselineServerAddr = (c["Reservations"][0]["Instances"][0]["PublicIpAddress"])
 
 print("Created all us-west-2 instances")
-
+'''
 
 
 sysConfig["MasterAddr"] = server1Addrs[0]
@@ -138,10 +139,10 @@ for i in range(len(sysConfig["Servers"])):
         sysConfig["Servers"][i]["Addr"] = server2Addrs[int(i/2)]
         sysConfig["Servers"][i]["ID"] = east2IDs[int(i/2)]
 
-sysConfig["BaselineServerAddr"] = baselineServerAddr
-sysConfig["BaselineServerID"] = west2IDs[0]
-sysConfig["BaselineClientAddr"] = baselineClientAddr
-sysConfig["BaselineClientID"] = west1IDs[0]
+#sysConfig["BaselineServerAddr"] = baselineServerAddr
+#sysConfig["BaselineServerID"] = west2IDs[0]
+#sysConfig["BaselineClientAddr"] = baselineClientAddr
+#sysConfig["BaselineClientID"] = west1IDs[0]
 
 sysConfig["SSHKeyPath"] = "~/.ssh/dory.pem"
 

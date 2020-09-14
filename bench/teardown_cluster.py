@@ -12,21 +12,22 @@ print(cmd)
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 process.wait()
 
+'''
 cmd = ('export AWS_DEFAULT_REGION=us-west-2; aws ec2 terminate-instances --instance-ids "%s"') % (sysConfig["BaselineServerID"])
 print(cmd)
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 process.wait()
-
+'''
 cmd = ('export AWS_DEFAULT_REGION=us-east-1; aws ec2 terminate-instances --instance-ids "%s"') % (sysConfig["ClientIDs"][0])
 print(cmd)
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 process.wait()
-
+'''
 cmd = ('export AWS_DEFAULT_REGION=us-west-1; aws ec2 terminate-instances --instance-ids "%s"') % (sysConfig["BaselineClientID"])
 print(cmd)
 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 process.wait()
-
+'''
 for i in range(len(sysConfig["Servers"])):
     region = "us-east-1"
     if i % 2 != 0:

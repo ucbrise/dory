@@ -9,6 +9,7 @@ replicas = ["1.1.1.1", "2.2.2.2"]
 bloomFilterSzList = [1120, 1280, 1440, 1600, 1800, 2000, 2240, 2520, 2800, 3120, 3480]
 
 isMalicious = True 
+isLeaky = False
 breakdown = True
 
 f = open("out/tab7.dat", "w")
@@ -17,7 +18,7 @@ f = open("out/tab7.dat", "w")
 for i in range(11):
     numDocs = 2 ** (i + 10)
     print(("Number of docs = %d, Bloom filter size = %d") % (numDocs, bloomFilterSzList[i]))
-    latencies = runDoryLatencyTest(bloomFilterSzList[i], numDocs, 10000, isMalicious, 0)
+    latencies = runDoryLatencyTest(bloomFilterSzList[i], numDocs, 10000, isMalicious, isLeaky, 0)
     print("-------------------------")
     f.write(("Number of docs = 2^%d, Bloom filter size = %d\n") % (i + 10, bloomFilterSzList[i]))
     if not breakdown: 

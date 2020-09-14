@@ -33,8 +33,8 @@ def generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, seconds, t
 def generateDorySetupClientLocalStr(numDocs, bloomFilterSz, numClusters):
     return ("cd dory; ./runClient.sh -n %s -b %s -p %s -z true") % (numDocs, bloomFilterSz, numClusters)
 
-def generateDoryLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious, numClusters):
-    return ("cd dory; ./runClient.sh -n %s -b %s -m %s -p %s -l true -a true") % (numDocs, bloomFilterSz, isMalicious, numClusters)
+def generateDoryLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious, isLeaky, numClusters):
+    return ("cd dory; ./runClient.sh -n %s -b %s -m %s -p %s -l true -a true -g %s") % (numDocs, bloomFilterSz, isMalicious, numClusters, isLeaky)
 
 def generateUpdateLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious):
     return ("cd dory; ./runClient.sh -n %s -b %s -m %s -d ../maildir -u true") % (numDocs, bloomFilterSz, isMalicious)
@@ -292,7 +292,7 @@ def runUpdateLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious):
 
     return latencies[len(latencies) - 1]
 
-def runDoryLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious, numClusters):
+def runDoryLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious, isLeaky, numClusters):
     print (("Starting Dory with bloom filter size %s, num docs %s, is malicious %s, num clusters %s") % (bloomFilterSz, numDocs, isMalicious, numClusters))
 
     servers = []
@@ -301,7 +301,7 @@ def runDoryLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious, numClusters)
     else: 
         servers = startParallelDoryLatencyServers(bloomFilterSz, int(numDocs), tickMs)
     time.sleep(5)
-    latencies = runLatencyClient(generateDoryLatencyClientLocalStr(int(numDocs), bloomFilterSz, isMalicious, numClusters))
+    latencies = runLatencyClient(generateDoryLatencyClientLocalStr(int(numDocs), bloomFilterSz, isMalicious, isLeaky, numClusters))
 
     for i in range(len(servers)):
         servers[i].terminate()

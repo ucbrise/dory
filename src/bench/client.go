@@ -376,7 +376,8 @@ func runThroughputClustersBenchmark(configFile string, numDocs int, bloomFilterS
             tick := time.Tick(duration)
             var conn *common.Conn
             if (useMaster && !isPlaintext) {
-                conn := client.OpenConnection()
+                log.Println("opening conn to master")
+                conn = client.OpenConnection()
                 defer client.CloseConnection(conn)
             }
             j := index * slice

@@ -273,7 +273,7 @@ func searchKeyword_malicious(req common.SearchRequest_malicious) (common.SearchR
 
     wg.Wait()
 
-    C.assemblePerThreadResults((*C.server)(s),
+    C.assemblePerThreadResults_malicious((*C.server)(s),
                                 (***C.uint8_t)(cResultsTemp),
                                 (C.int)(kNumThreads),
                                 (**C.uint8_t)(cResultsFinal))
@@ -342,7 +342,7 @@ func searchKeyword_semihonest(req common.SearchRequest_semihonest) (common.Searc
 
     wg.Wait()
 
-    C.assemblePerThreadResults((*C.server)(s),
+    C.assemblePerThreadResults_semihonest((*C.server)(s),
                                 (***C.uint8_t)(cResultsTemp),
                                 (C.int)(kNumThreads),
                                 (**C.uint8_t)(cResultsFinal))

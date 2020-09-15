@@ -1,5 +1,5 @@
 import sys, string, json
-from benchClient import runDoryLatencyTest
+from benchClient import runUpdateLatencyTest
 
 bloomFilterSzList = [1120, 1280, 1440, 1600, 1800, 2000, 2240, 2520, 2800, 3120, 3480]
 

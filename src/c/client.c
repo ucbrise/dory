@@ -377,6 +377,72 @@ cleanup:
     return rv;
 }
 
+/* Assemble responses for keyword queries (only for malicious adversaries). */
+int assembleQueryResponses_leaky(client *c, uint8_t **initialResults, uint32_t *indexes, uint8_t *docsPresent) {
+    /* Assemble responses. */
+    int rv;
+    uint8_t **results;
+    uint8_t **macs;
+    
+    CHECK_A (results = malloc(BLOOM_FILTER_K * sizeof(uint8_t *)));
+    for (int i = 0; i < BLOOM_FILTER_K; i++) {
+        CHECK_A (results[i] = malloc(NUM_DOCS_BYTES));
+    }
+
+    CHECK_A (macs = malloc(BLOOM_FILTER_K * sizeof(uint8_t *)));
+    for (int i = 0; i < BLOOM_FILTER_K; i++) {
+        CHECK_A (macs[i] = malloc(MAC_BYTES));
+        memset(macs[i], 0, MAC_BYTES);
+    }
+
+    /* Reassemble results. */
+    for (int i = 0; i < BLOOM_FILTER_K; i++) {
+        for (int j = 0; j < MAC_BYTES; j++) {
+            macs[i][j] = initialResults[i][j];
+        }
+        for (int j = 0; j < NUM_DOCS_BYTES; j++) {
+            results[i][j] = initialResults[i][j + MAC_BYTES];
+        }
+    }
+
+    uint128_t mac = 0;
+    
+    /* Check MACs. */
+    pthread_t t[BLOOM_FILTER_K];
+    macArgs args[BLOOM_FILTER_K];
+    for (int i = 0; i < BLOOM_FILTER_K; i++) {
+        /* Add up all bits in results[i] mod MAC_MODP */
+        args[i].col = indexes[i];
+        args[i].c = c;
+        args[i].results = results[i];
+        memcpy(&args[i].receivedMac, macs[i], MAC_BYTES);
+
+        pthread_create(&t[i], NULL, checkColMACs, args);
+    }
+    for (int i = 0; i < BLOOM_FILTER_K; i++) {
+        pthread_join(t[i], NULL);
+    }
+
+    /* Decrypt columns. */
+    CHECK_C (decryptCols(c, results, indexes));
+
+    /* Look for where all 1s. */
+    memset(docsPresent, 0xff, NUM_DOCS_BYTES);
+    for (int i = 0; i < NUM_DOCS_BYTES; i++) {
+        for (int j = 0; j < BLOOM_FILTER_K; j++) {
+            docsPresent[i] = docsPresent[i] & results[j][i];
+        }
+    }
+
+cleanup:
+    for (int i = 0; i < BLOOM_FILTER_K; i++) {
+        if (results && results[i]) free(results[i]);
+        if (macs && macs[i]) free(macs[i]);
+    }
+    if (results) free(results);
+    return rv;
+}
+
 /* Update the client state.. */
 void updateClientState(client *c, int numDocs, uint32_t *versions) {
     if (numDocs < NUM_DOCS) return;

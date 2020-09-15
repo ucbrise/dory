@@ -691,6 +691,7 @@ func SearchKeyword_leaky(conn *common.Conn, keyword string, useMaster bool) ([]b
     cIndexes := C.malloc(C.size_t(C.BLOOM_FILTER_K) * C.size_t(unsafe.Sizeof((C.uint32_t)(1))))
   
     cResults := C.malloc(C.size_t(C.BLOOM_FILTER_K) * C.size_t(unsafe.Sizeof(&keyword)))
+    cDocsPresent := C.malloc(C.size_t(C.NUM_DOCS_BYTES))
     cResultsIndexable := (*[1<<30 - 1]*C.uint8_t)(unsafe.Pointer(cResults))
     cIndexesIndexable := (*[1<<30 - 1]C.uint32_t)(unsafe.Pointer(cIndexes))
 
@@ -723,9 +724,13 @@ func SearchKeyword_leaky(conn *common.Conn, keyword string, useMaster bool) ([]b
     for i := 0; i < int(C.BLOOM_FILTER_K); i++ {
        cResultsIndexable[i] = (*C.uint8_t)(C.CBytes(resp.Results[i]))
     }
-    
+   
+    C.assembleQueryResponses_leaky((*C.client)(c),
+                                   (**C.uint8_t)(cResults),
+                                   (*C.uint32_t)(cIndexes),
+                                   (*C.uint8_t)(cDocsPresent))
 
-    docsPresent := C.GoBytes(cResults, C.int(C.NUM_DOCS_BYTES))
+    docsPresent := C.GoBytes(cDocsPresent, C.int(C.NUM_DOCS_BYTES))
 
     return docsPresent, nil
 }

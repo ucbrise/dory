@@ -40,6 +40,7 @@ int assembleQueryResponses(client *c, uint8_t **results1, uint8_t **results2, ui
 /* Perform search (malicious adversary). */
 int generateKeywordQuery_malicious(client *c, char *keyword, unsigned char *keys_s1[], unsigned char *keys_s2[], uint32_t *indexes);
 int assembleQueryResponses_malicious(client *c, uint8_t **results1, uint8_t **results2, uint32_t *indexes, uint8_t *docsPresent);
+int assembleQueryResponses_leaky(client *c, uint8_t **initialResults, uint32_t *indexes, uint8_t *docsPresent);
 
 /* Update state. */
 void updateClientState(client *c, int numDocs, uint32_t *versions);

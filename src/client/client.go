@@ -258,18 +258,26 @@ func UpdateDoc_semihonest(conn *common.Conn, keywords []string, docID int, useMa
 }
 
 /* Generate update (semihonest adversaries). */
-func UpdateDoc_plaintext(keywords []string, docID int) error {
+func UpdateDoc_plaintext(conn *common.Conn, keywords []string, docID int, useMaster bool) error {
 
     req := &common.UpdateRequest_plaintext{
         DocID: docID,
         Keywords: keywords,
     }
 
-    common.SendMessageNoResp(
-        config.Addr[0] + config.Port[0],
-        common.UPDATE_REQUEST_PLAINTEXT,
-        req,
-    )
+    if (useMaster) {
+        common.SendMessageWithConnectionNoResp(
+            conn,
+            common.UPDATE_REQUEST_PLAINTEXT,
+            req,
+        )
+    } else {
+        common.SendMessageNoResp(
+            config.Addr[0] + config.Port[0],
+            common.UPDATE_REQUEST_PLAINTEXT,
+            req,
+        )
+    }
     return nil
 }
 
@@ -350,9 +358,10 @@ func UpdateDocFile_semihonest(conn *common.Conn, filename string, docID int, use
 }
 
 /* Update document, tokenizing words from file (plaintext). */
-func UpdateDocFile_plaintext(filename string, docID int) error {
+func UpdateDocFile_plaintext(conn *common.Conn, filename string, docID int, useMaster bool) error {
+    log.Println(filename)
     keywords := GetKeywordsFromFile(filename)
-    return UpdateDoc_plaintext(keywords, docID)
+    return UpdateDoc_plaintext(conn, keywords, docID, useMaster)
 }
 
 func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) ([]byte, error, time.Duration, time.Duration, time.Duration, time.Duration, time.Duration) {

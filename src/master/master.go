@@ -32,6 +32,8 @@ import(
 var config common.MasterConfig
 
 var updateList []common.Update
+var updatePlaintextIndexLock sync.Mutex
+var updatePlaintextIndex map[string][]int
 var updateLocks []sync.Mutex
 
 var versionNum int
@@ -72,11 +74,12 @@ func logLatency (latency time.Duration, tag string) {
 }
 
 /* Start two phase commit with servers for cached updates. */
-func start2PC(version int, updateMapCopy map[int]common.Update) {
+func start2PC(version int, updateMapCopy map[int]common.Update, plaintextUpdateMapCopy map[string][]int) {
 
     commitReq := &common.BatchStartRequest{
         VersionNum:     version,
 	    Updates:	updateMapCopy,
+        PlaintextUpdates: plaintextUpdateMapCopy, 
         Malicious:      isMalicious, 
     }
 
@@ -164,6 +167,25 @@ func updateDoc_malicious(req common.UpdateRequest_malicious) (common.UpdateRespo
     return common.UpdateResponse_malicious{}, nil
 }
 
+func updateDoc_plaintext(req common.UpdateRequest_plaintext) (common.UpdateResponse_plaintext, error) {
+
+    for _, keyword := range req.Keywords {
+        if _, ok := updatePlaintextIndex[keyword]; ok {
+            for _, docID := range updatePlaintextIndex[keyword] {
+                if (docID == req.DocID) {
+                    continue
+                }
+            }
+            updatePlaintextIndex[keyword] = append(updatePlaintextIndex[keyword], req.DocID)
+        } else {
+            updatePlaintextIndex[keyword] = []int{req.DocID}
+        }
+    }
+
+    return common.UpdateResponse_plaintext{Test: "success"}, nil
+
+}
+
 /* Process getState request by returning current version number. */
 func getState (req common.GetStateRequest) (common.GetStateResponse, error) {
     docVersionsCopy := make([]uint32, len(docVersions))
@@ -216,6 +238,13 @@ func handleConnection(conn net.Conn) {
                 log.Fatalln(err)
             }
             updateDoc_malicious(req)
+
+        case common.UPDATE_REQUEST_PLAINTEXT:
+            var req common.UpdateRequest_plaintext
+            if err := dec.Decode(&req); err != nil {
+                log.Fatalln(err)
+            }   
+            updateDoc_plaintext(req)
 
         case common.SETUP_REQUEST:
             var req common.MasterSetupRequest
@@ -275,12 +304,35 @@ func tickLoop() {
         for docID := 0; docID < len(updateList); docID++ {
             updateLocks[docID].Unlock()
         }
-        start2PC(versionNum + 1, updateMapCopy)
+        start2PC(versionNum + 1, updateMapCopy, nil)
         versionNumLock.Lock()
         versionNum += 1
         versionNumLock.Unlock()
     }
 }
+
+func tickLoop_plaintext() {
+    tick := time.Tick(tickTime)
+    for {
+        <-tick
+        if len(updatePlaintextIndex) == 0 {
+            continue
+        }
+	    updateMapCopy := make(map[string][]int)
+        updatePlaintextIndexLock.Lock()
+        for key := range(updatePlaintextIndex) {
+            updateMapCopy[key] = updatePlaintextIndex[key]
+        }
+        updatePlaintextIndex = make(map[string][]int)
+        updatePlaintextIndexLock.Unlock()
+        start2PC(versionNum + 1, nil, updateMapCopy)
+        versionNumLock.Lock()
+        versionNum += 1
+        versionNumLock.Unlock()
+    }
+}
+
+
 
 
 func main() {
@@ -310,6 +362,7 @@ func main() {
     versionNum = 0
     docVersions =  make([]uint32, maxDocs)
     updateList = make([]common.Update, maxDocs)
+    updatePlaintextIndex = make(map[string][]int)
     updateLocks = make([]sync.Mutex, maxDocs)
 
     go tickLoop()

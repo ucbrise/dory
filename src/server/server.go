@@ -225,12 +225,8 @@ func searchKeyword_malicious(req common.SearchRequest_malicious) (common.SearchR
     var s *C.server = sNew
     if (req.Version == newVersionNum) {
         s = sNew
-        log.Println("new version num")
     } else if (req.Version == oldVersionNum) {
         s =  sOld
-        log.Println("old version num")
-    }  else {
-        log.Println("Unknown version number: ", req.Version)
     }
 
     cKeys := (***C.uchar)(C.malloc(C.size_t(kNumThreads) * C.size_t(unsafe.Sizeof(&req))))
@@ -298,8 +294,6 @@ func searchKeyword_semihonest(req common.SearchRequest_semihonest) (common.Searc
         s = sNew
     } else if (req.Version == oldVersionNum) {
         s =  sOld
-    }  else {
-        log.Println("Unknown version number: ", req.Version)
     }
 
     cKeys := (***C.uchar)(C.malloc(C.size_t(kNumThreads) * C.size_t(unsafe.Sizeof(&req))))
@@ -367,8 +361,6 @@ func searchKeyword_leaky(req common.SearchRequest_leaky) (common.SearchResponse_
         s = sNew
     } else if (req.Version == oldVersionNum) {
         s =  sOld
-    }  else {
-        log.Println("Unknown version number: ", req.Version)
     }
 
     cResults := (**C.uint8_t)(C.malloc(C.size_t(C.BLOOM_FILTER_K) * C.size_t(unsafe.Sizeof(&req))))

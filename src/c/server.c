@@ -93,7 +93,6 @@ int runQuery_leaky(server *s, uint32_t *indexes, uint8_t **results) {
 
     for (int i = 0; i < BLOOM_FILTER_K; i++) {
         if (indexes[i] >= BLOOM_FILTER_SZ) printf("OUT OF BOUNDS: %d / %d\n", indexes[i], BLOOM_FILTER_SZ);
-        printf("%d/%d\n", i, BLOOM_FILTER_K);
         memcpy(results[i], s->indexList[indexes[i]], NUM_DOCS_BYTES);
     }
     

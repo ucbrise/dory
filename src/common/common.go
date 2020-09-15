@@ -85,6 +85,7 @@ type SearchRequest_leaky struct {
 
 type SearchRequest_plaintext struct {
     Keyword        string
+    Version        int
 }
 
 type SearchResponse_malicious struct {
@@ -163,6 +164,7 @@ type MasterSetupResponse struct {
 type BatchStartRequest struct {
     VersionNum      int
     Updates         map[int]Update
+    PlaintextUpdates  map[string][]int
     Malicious       bool
 }
 

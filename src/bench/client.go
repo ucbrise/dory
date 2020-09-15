@@ -182,7 +182,7 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
     outFile := client.Setup(configFile, bloomFilterSz, numDocs)
     var conn *common.Conn
 
-    if (useMaster && !isPlaintext) {
+    if (useMaster) {
         conn = client.OpenConnection()
     }
 
@@ -193,7 +193,7 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
             if (isMalicious) {
                 client.UpdateDoc_malicious(conn, []string{"hello", "world"}, i, useMaster)
             } else if (isPlaintext) {
-                client.UpdateDoc_plaintext([]string{"hello", "world"}, i)
+                client.UpdateDoc_plaintext(conn, []string{"hello", "world"}, i, useMaster)
             } else {
                 client.UpdateDoc_semihonest(conn, []string{"hello", "world"}, i, useMaster)
             }
@@ -286,7 +286,7 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
 
     var conn *common.Conn
 
-    if (useMaster && !isPlaintext) {
+    if (useMaster) {
         conn = client.OpenConnection()
     }
 
@@ -305,7 +305,7 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
                 if (isMalicious) {
                     err = client.UpdateDocFile_malicious(conn, filename, docID, useMaster)
                 } else if (isPlaintext) {
-                    err = client.UpdateDocFile_plaintext(filename, docID)
+                    err = client.UpdateDocFile_plaintext(conn, filename, docID, useMaster)
                 }else {
                     err = client.UpdateDocFile_semihonest(conn, filename, docID, useMaster)
                 }
@@ -369,13 +369,19 @@ func runThroughputClustersBenchmark(configFile string, numDocs int, bloomFilterS
     wg.Add(threads)
     totals := make([]int, threads)
     slice := numDocs / threads
+    
+    keywords := make(map[int][]string)
+    for i := 0; i < 128; i += 1 {
+        keywords[i] = client.GetKeywordsFromFile("sample_docs/" + strconv.Itoa((i + 1)))
+    }
+
 
     for i := 0; i < threads; i++ {
         go func(index int) {
             defer wg.Done()
             tick := time.Tick(duration)
             var conn *common.Conn
-            if (useMaster && !isPlaintext) {
+            if (useMaster) {
                 log.Println("opening conn to master")
                 conn = client.OpenConnection()
                 defer client.CloseConnection(conn)
@@ -395,8 +401,9 @@ func runThroughputClustersBenchmark(configFile string, numDocs int, bloomFilterS
                         if (isMalicious) {
                             client.DummyUpdateDoc_malicious(conn, []string{"hello", "world"}, (j % numDocs), useMaster)
                         } else if (isPlaintext) {
-                            docID := (j % 128) + 1
-                            client.UpdateDocFile_plaintext("sample_docs/" + string(docID), docID)
+                            docID := (updateCtr % 128) + 1
+                            client.UpdateDoc_plaintext(conn, keywords[j], docID, useMaster)
+                            //client.UpdateDocFile_plaintext(conn, "sample_docs/" + strconv.Itoa(docID), docID, useMaster)
                         } else {
                             client.DummyUpdateDoc_semihonest(conn, []string{"hello", "world"}, (j % numDocs), useMaster)
                         }
@@ -411,8 +418,9 @@ func runThroughputClustersBenchmark(configFile string, numDocs int, bloomFilterS
                         } else if (leaky) {
                             client.SearchKeyword_leaky(conn, "hello", useMaster)
                         } else if (isPlaintext) {
-                            keywords := client.GetKeywordsFromFile("sample_docs/" + string((j % 128) + 1))
-                            keyword := keywords[rand.Intn(len(keywords))]
+                            //keywords := client.GetKeywordsFromFile("sample_docs/" + strconv.Itoa((j % 128) + 1))
+                            //log.Println(len(keywords))
+                            keyword := keywords[j % 128][rand.Intn(len(keywords[j % 128]))]
                             client.SearchKeyword_plaintext(keyword)
                         } else {
                             client.SearchKeyword_semihonest(conn, "hello", useMaster)

@@ -24,11 +24,11 @@ devNull = open(os.devnull, 'w')
 def generateRemoteCmdStr(machine, remoteCmd):
     return ("ssh -i %s -o StrictHostKeyChecking=no %s@%s \"%s\"") % (keyPath, username, machine, remoteCmd)
 
-def generateDoryThroughputClientLocalStr(numDocs, bloomFilterSz, seconds, threads, isMalicious, numUpdates, numSearches):
-    return ("cd dory; ./runClient.sh -n %s -b %s -t true -x %s -y %s -m %s -q %s -r %s") % (numDocs, bloomFilterSz, seconds, threads, isMalicious, numUpdates, numSearches)
+def generateDoryThroughputClientLocalStr(numDocs, bloomFilterSz, seconds, threads, isMalicious, numUpdates, numSearches, useMaster):
+    return ("cd dory; ./runClient.sh -n %s -b %s -t true -x %s -y %s -m %s -q %s -r %s -s %s") % (numDocs, bloomFilterSz, seconds, threads, isMalicious, numUpdates, numSearches, useMaster)
 
-def generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, seconds, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky):
-    return ("cd dory; ./runClient.sh -n %s -b %s -t true -x %s -y %s -m %s -g %s -q %s -r %s -p %s") % (numDocs, bloomFilterSz, seconds, threads, isMalicious, isLeaky, numUpdates, numSearches, numClusters)
+def generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, seconds, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky, useMaster):
+    return ("cd dory; ./runClient.sh -n %s -b %s -t true -x %s -y %s -m %s -g %s -q %s -r %s -p %s -s %s") % (numDocs, bloomFilterSz, seconds, threads, isMalicious, isLeaky, numUpdates, numSearches, numClusters, useMaster)
 
 def generateDorySetupClientLocalStr(numDocs, bloomFilterSz, numClusters, isMalicious):
     return ("cd dory; ./runClient.sh -n %s -b %s -p %s -z true -m %s") % (numDocs, bloomFilterSz, numClusters, isMalicious)
@@ -242,14 +242,14 @@ def runOramClient(clientLocalCmd, oramClient):
 
     return output.decode("utf-8") 
 
-def runDoryThroughputTest(bloomFilterSz, numDocs, tickMs, clientS, threads, isMalicious, numUpdates, numSearches):
+def runDoryThroughputTest(bloomFilterSz, numDocs, tickMs, clientS, threads, isMalicious, useMaster, numUpdates, numSearches):
     print (("Starting Dory with bloom filter size %s, num docs %s, tick ms %s, client duration %s, client threads %s, is malicious %s, updates to searches %s/%s") % (bloomFilterSz, numDocs, tickMs, clientS, threads, isMalicious, numUpdates, numSearches))
 
     servers = startDoryThroughputServers(bloomFilterSz, int(numDocs), tickMs)
     time.sleep(5)
     clientStrs = []
     for i in range(len(clients)):
-        clientStrs.append(generateDoryThroughputClientLocalStr(numDocs, bloomFilterSz, clientS, threads, isMalicious, numUpdates, numSearches))
+        clientStrs.append(generateDoryThroughputClientLocalStr(numDocs, bloomFilterSz, clientS, threads, isMalicious, numUpdates, numSearches, useMaster))
     throughput = runThroughputClients(clientStrs, clientS)
 
     for i in range(len(servers)):
@@ -266,12 +266,12 @@ def initForDoryMixedThroughput(bloomFilterSz, numDocs, tickMs, clientS, threads,
     time.sleep(3)
     return servers 
 
-def runDoryMixedThroughputTest(bloomFilterSz, numDocs, tickMs, clientS, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky):
+def runDoryMixedThroughputTest(bloomFilterSz, numDocs, tickMs, clientS, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky, useMaster):
     print (("Starting Dory with bloom filter size %s, num docs %s, tick ms %s, client duration %s, client threads %s, updates to searches %s/%s, num clusters %s") % (bloomFilterSz, numDocs, tickMs, clientS, threads, numUpdates, numSearches, numClusters))
 
     clientStrs = []
     for i in range(len(clients)):
-        clientStrs.append(generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, clientS, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky))
+        clientStrs.append(generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, clientS, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky, useMaster))
     throughput = runThroughputClients(clientStrs, clientS)
     return throughput
 

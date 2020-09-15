@@ -278,7 +278,7 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
     if err != nil {
         log.Fatal(err)
     }
-    //totalIterations := 1000
+    totalIterations := 1000
 
     /* Initialize client */
     log.Println("Initializing client...")
@@ -313,18 +313,18 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
                 if err != nil {
                     log.Fatal(err)
                 }
-                /*if ctr >= totalIterations {
+                if ctr >= totalIterations {
                     break
-                }*/
+                }
             }
-            /*if ctr >= totalIterations {
+            if ctr >= totalIterations {
                 break
-            }*/
+            }
             log.Println("Finished: ", topDir.Name() + "/" + midDir.Name())
         }
-        /*if ctr >= totalIterations {
+        if ctr >= totalIterations {
             break
-        }*/
+        }
     }
     elapsed := float64(time.Since(start).Nanoseconds())/float64(1e6)/float64(ctr)
 

@@ -258,7 +258,7 @@ func UpdateDoc_semihonest(conn *common.Conn, keywords []string, docID int, useMa
 }
 
 /* Generate update (semihonest adversaries). */
-func UpdateDoc_plaintext(conn *common.Conn, keywords []string, docID int, useMaster bool) error {
+func UpdateDoc_plaintext(conn *common.Conn, keywords []string, docID int, useMaster bool) (int, error) {
 
     req := &common.UpdateRequest_plaintext{
         DocID: docID,
@@ -278,7 +278,7 @@ func UpdateDoc_plaintext(conn *common.Conn, keywords []string, docID int, useMas
             req,
         )
     }
-    return nil
+    return int(unsafe.Sizeof(req)), nil
 }
 
 /* Send dummy update (only used for throughput measurements for semihonest adversaries). */
@@ -358,7 +358,7 @@ func UpdateDocFile_semihonest(conn *common.Conn, filename string, docID int, use
 }
 
 /* Update document, tokenizing words from file (plaintext). */
-func UpdateDocFile_plaintext(conn *common.Conn, filename string, docID int, useMaster bool) error {
+func UpdateDocFile_plaintext(conn *common.Conn, filename string, docID int, useMaster bool) (int, error) {
     log.Println(filename)
     keywords := GetKeywordsFromFile(filename)
     return UpdateDoc_plaintext(conn, keywords, docID, useMaster)
@@ -735,7 +735,7 @@ func SearchKeyword_leaky(conn *common.Conn, keyword string, useMaster bool) ([]b
     return docsPresent, nil
 }
 
-func SearchKeyword_plaintext(keyword string) ([]int, error) {
+func SearchKeyword_plaintext(keyword string) ([]int, int, error) {
     req := &common.SearchRequest_plaintext{
         Keyword: keyword,
     }
@@ -750,7 +750,7 @@ func SearchKeyword_plaintext(keyword string) ([]int, error) {
             &respError,
         )
 
-    return resp.Results, nil
+    return resp.Results, int(unsafe.Sizeof(req) + unsafe.Sizeof(resp)), nil
 }
 
 func RunFastSetup(benchmarkDir string, useMaster bool) error {

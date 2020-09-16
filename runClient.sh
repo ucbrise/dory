@@ -17,8 +17,9 @@ latency_prints="false"
 latency_bench="false"
 update_bench="false"
 plaintext="false"
+total_iterations="1000"
 
-while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:l:a:u:g:i:" opt; do
+while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:l:a:u:g:i:j:" opt; do
     case "$opt" in
         h|\?)
             echo -e "\nArguments: "
@@ -101,10 +102,12 @@ while getopts ":h?:d:t:b:n:m:f:s:c:x:y:q:r:p:z:l:a:u:g:i:" opt; do
         i) plaintext=$OPTARG
             ;;
 
+        j) total_iterations=$OPTARG
+            ;;
     esac
 done
 
 echo "bench_dir='$bench_dir', tests='$correct', bf_sz='$bf_sz', num_docs='$num_docs', malicious='$malicious'"
 
-CGO_CFLAGS="-I./libsolv-sys/src -D LIBSOLV_INTERNAL -w" CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/bench/client.go --config=src/config/client.config --test="$correct" --bench_dir="$bench_dir" --bf_sz="$bf_sz" --num_docs="$num_docs" --malicious="$malicious" --fast_setup="$fast_setup" --use_master="$use_master" --throughput="$throughput" --throughput_sec="$throughput_sec" --throughput_threads="$throughput_threads" --num_updates="$num_updates" --num_searches="$num_searches" --num_clusters="$num_clusters" --only_setup="$only_setup" --latency_prints="$latency_prints" --latency_bench="$latency_bench" --update_bench="$update_bench" --leaky="$leaky" --plaintext="$plaintext"
+CGO_CFLAGS="-I./libsolv-sys/src -D LIBSOLV_INTERNAL -w" CGO_LDFLAGS="-lssl -lpthread -lcrypto -lm "$PWD"/src/c/libstemmer.o" go run src/bench/client.go --config=src/config/client.config --test="$correct" --bench_dir="$bench_dir" --bf_sz="$bf_sz" --num_docs="$num_docs" --malicious="$malicious" --fast_setup="$fast_setup" --use_master="$use_master" --throughput="$throughput" --throughput_sec="$throughput_sec" --throughput_threads="$throughput_threads" --num_updates="$num_updates" --num_searches="$num_searches" --num_clusters="$num_clusters" --only_setup="$only_setup" --latency_prints="$latency_prints" --latency_bench="$latency_bench" --update_bench="$update_bench" --leaky="$leaky" --plaintext="$plaintext" --total_iterations="$total_iterations"
 

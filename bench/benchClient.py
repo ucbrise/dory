@@ -27,17 +27,17 @@ def generateRemoteCmdStr(machine, remoteCmd):
 def generateDoryThroughputClientLocalStr(numDocs, bloomFilterSz, seconds, threads, isMalicious, numUpdates, numSearches, useMaster):
     return ("cd dory; ./runClient.sh -n %s -b %s -t true -x %s -y %s -m %s -q %s -r %s -s %s") % (numDocs, bloomFilterSz, seconds, threads, isMalicious, numUpdates, numSearches, useMaster)
 
-def generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, seconds, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky, useMaster):
-    return ("cd dory; ./runClient.sh -n %s -b %s -t true -x %s -y %s -m %s -g %s -q %s -r %s -p %s -s %s") % (numDocs, bloomFilterSz, seconds, threads, isMalicious, isLeaky, numUpdates, numSearches, numClusters, useMaster)
+def generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, seconds, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky, isPlaintext, useMaster):
+    return ("cd dory; ./runClient.sh -n %s -b %s -t true -x %s -y %s -m %s -g %s -i %s -q %s -r %s -p %s -s %s") % (numDocs, bloomFilterSz, seconds, threads, isMalicious, isLeaky, isPlaintext, numUpdates, numSearches, numClusters, useMaster)
 
 def generateDorySetupClientLocalStr(numDocs, bloomFilterSz, numClusters, isMalicious):
     return ("cd dory; ./runClient.sh -n %s -b %s -p %s -z true -m %s") % (numDocs, bloomFilterSz, numClusters, isMalicious)
 
-def generateDoryLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious, isLeaky, numClusters):
-    return ("cd dory; ./runClient.sh -n %s -b %s -m %s -p %s -l true -a true -g %s") % (numDocs, bloomFilterSz, isMalicious, numClusters, isLeaky)
+def generateDoryLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious, isLeaky, isPlaintext, numClusters):
+    return ("cd dory; ./runClient.sh -n %s -b %s -m %s -p %s -l true -a true -g %s -i %s") % (numDocs, bloomFilterSz, isMalicious, numClusters, isLeaky, isPlaintext)
 
-def generateUpdateLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious, isLeaky):
-    return ("cd dory; ./runClient.sh -n %s -b %s -m %s -d ../maildir -u true -g %s") % (numDocs, bloomFilterSz, isMalicious, isLeaky)
+def generateUpdateLatencyClientLocalStr(numDocs, bloomFilterSz, isMalicious, isLeaky, isPlaintext, numIterations):
+    return ("cd dory; ./runClient.sh -n %s -b %s -m %s -d ../maildir -u true -g %s -i %s -j %s") % (numDocs, bloomFilterSz, isMalicious, isLeaky, isPlaintext, numIterations)
 
 def generateOramClientLocalStr(numDocs, oramServer):
     return("cd dory/baseline; export GOPATH=/home/ec2-user/dory/baseline; go run src/client/run_client.go -n %s -addr %s:4441") % (numDocs, oramServer)
@@ -121,6 +121,18 @@ def startParallelDoryLatencyServers(bloomFilterSz, numDocs, tickMs):
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[7], replicaCmd),
         shell=True, stdout=devNull, stderr=devNull))
     return processes
+
+def startPlaintextServers(tickMs):
+    processes = []
+    masterCmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runMaster.sh -t %s") % (masterPort, tickMs)
+    print(masterCmd)
+    processes.append(subprocess.Popen(generateRemoteCmdStr(master, masterCmd),
+        shell=True, stdout=devNull, stderr=devNull))
+    replica1Cmd = ("sudo lsof -t -i tcp%s | sudo xargs kill > /dev/null &> /dev/null; cd dory; ./runPlaintextServer.sh") % (replicaPorts[0])
+    print(replica1Cmd)
+    processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[0], replica1Cmd),
+        shell=True, stdout=devNull, stderr=devNull))
+ 
 
 def startOramServer(oramServer, numDocs):
     serverCmd = ("sudo lsof -t -i tcp:4441 | sudo xargs kill > /dev/null &> /dev/null; sleep 1; cd dory/baseline; export GOPATH=/home/ec2-user/dory/baseline; go run src/server/run_server.go -n %s") % (numDocs)
@@ -266,12 +278,12 @@ def initForDoryMixedThroughput(bloomFilterSz, numDocs, tickMs, clientS, threads,
     time.sleep(3)
     return servers 
 
-def runDoryMixedThroughputTest(bloomFilterSz, numDocs, tickMs, clientS, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky, useMaster):
+def runDoryMixedThroughputTest(bloomFilterSz, numDocs, tickMs, clientS, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky, isPlaintext, useMaster):
     print (("Starting Dory with bloom filter size %s, num docs %s, tick ms %s, client duration %s, client threads %s, updates to searches %s/%s, num clusters %s") % (bloomFilterSz, numDocs, tickMs, clientS, threads, numUpdates, numSearches, numClusters))
 
     clientStrs = []
     for i in range(len(clients)):
-        clientStrs.append(generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, clientS, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky, useMaster))
+        clientStrs.append(generateDoryMixedThroughputClientLocalStr(numDocs, bloomFilterSz, clientS, threads, numUpdates, numSearches, numClusters, isMalicious, isLeaky, isPlaintext, useMaster))
     throughput = runThroughputClients(clientStrs, clientS)
     return throughput
 
@@ -279,18 +291,23 @@ def cleanupForDoryMixedThroughput(servers):
     for i in range(len(servers)):
         servers[i].terminate()
 
-def runUpdateLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious, isLeaky):
+def runPlaintextUpdateSetup(tickMs, totalIterations):
+    servers = startPlaintextServers(tickMs)
+    latencies, runLatencyClient(generateUpdateLatencyClientLocalStr(128, 128, False, False, True, totalIterations))
+    return latencies[len(latencies) - 1], latencies[len(latencies) - 2], servers
+
+def runUpdateLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious, isLeaky, totalIterations):
     print (("Starting Dory with bloom filter size %s, num docs %s, is malicious %s") % (bloomFilterSz, numDocs, isMalicious))
 
     servers = []
     servers = startDoryLatencyServers(bloomFilterSz, int(numDocs), tickMs)
     time.sleep(5)
-    latencies = runLatencyClient(generateUpdateLatencyClientLocalStr(int(numDocs), bloomFilterSz, isMalicious, isLeaky))
+    latencies = runLatencyClient(generateUpdateLatencyClientLocalStr(int(numDocs), bloomFilterSz, isMalicious, isLeaky, False, totalIterations))
 
     for i in range(len(servers)):
         servers[i].terminate()
 
-    return latencies[len(latencies) - 1]
+    return latencies[len(latencies) - 2], latencies[len(latencies) - 1]
 
 def runDoryLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious, isLeaky, numClusters):
     print (("Starting Dory with bloom filter size %s, num docs %s, is malicious %s, num clusters %s") % (bloomFilterSz, numDocs, isMalicious, numClusters))
@@ -301,12 +318,16 @@ def runDoryLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious, isLeaky, num
     else: 
         servers = startParallelDoryLatencyServers(bloomFilterSz, int(numDocs), tickMs)
     time.sleep(5)
-    latencies = runLatencyClient(generateDoryLatencyClientLocalStr(int(numDocs), bloomFilterSz, isMalicious, isLeaky, numClusters))
+    latencies = runLatencyClient(generateDoryLatencyClientLocalStr(int(numDocs), bloomFilterSz, isMalicious, isLeaky, False, numClusters))
 
     for i in range(len(servers)):
         servers[i].terminate()
 
     return latencies
+
+def runPlaintextLatencyTest(servers):
+    latencies = runLatencyClient(generateDoryLatencyClientLocalStr(128, 128, False, False, True, 0))
+    return latencies[len(latencies) - 1], latencies[len(latencies) - 2]
 
 def runOramTest(oramServer, oramClient, numDocs):
     print("Starting ORAM tests for num docs %s" % numDocs)

@@ -186,9 +186,9 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
         conn = client.OpenConnection()
     }
 
-    if (fastSetup) {
+    if (fastSetup && !isPlaintext) {
         client.RunFastSetup("", useMaster);
-    } else {
+    } else if (!isPlaintext) {
         for i := 0; i < numDocs; i++ {
             if (isMalicious) {
                 client.UpdateDoc_malicious(conn, []string{"hello", "world"}, i, useMaster)
@@ -209,6 +209,7 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
     clientMs := 0.0
     networkMs := 0.0
     serverMs := 0.0
+    bw := 0
     for i := 0; i < numTrials; i++ {
         if (isMalicious) {
             _, _, t1, t2, t3, t4, t5  := client.SearchKeyword_malicious(conn, "hello", useMaster)
@@ -219,7 +220,7 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
         } else if (isLeaky) {
             _, err = client.SearchKeyword_leaky(conn, "hello", useMaster)
         } else if (isPlaintext) {
-            _, err = client.SearchKeyword_plaintext("hello")
+            _, bw, err = client.SearchKeyword_plaintext("hello")
         }else {
             _, err = client.SearchKeyword_semihonest(conn, "hello", useMaster)
         }
@@ -255,7 +256,9 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
         log.Println(err)
     }
 
-    if (latencyPrints) {
+    if (isPlaintext) {
+        log.Printf("%d %f\n", bw, timeMs)
+    } else if (latencyPrints) {
         log.Printf("total time to search: %f ms\n", timeMs);
         log.Printf("-> consensus: %f ms\n", getStateMs);
         log.Printf("-> client: %f ms\n", clientMs);
@@ -266,19 +269,19 @@ func runArtificialBenchmark(configFile string, numDocs int, bloomFilterSz int, i
     } else {
         log.Printf("Completed search in %f ms\n", timeMs);
     }
-    if (useMaster && !isPlaintext) {
+    if (useMaster) {
         client.CloseConnection(conn)
     }
     client.Cleanup()
 }
 
 /* Measure update latency using documents from directory. */
-func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, numDocs int, isMalicious bool, isPlaintext bool, useMaster bool) {
+func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, numDocs int, isMalicious bool, isPlaintext bool, useMaster bool, totalIterations int) {
     topDirs, err := ioutil.ReadDir(benchmarkDir)
     if err != nil {
         log.Fatal(err)
     }
-    totalIterations := 1000
+    //totalIterations := 1000
 
     /* Initialize client */
     log.Println("Initializing client...")
@@ -294,6 +297,8 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
 
     ctr := 0
     start := time.Now()
+    bw := 0
+    bwTotal := 0
     for _,topDir := range topDirs {
         midDirs, _ := ioutil.ReadDir(benchmarkDir + "/" + topDir.Name())
         for _,midDir := range midDirs {
@@ -305,7 +310,8 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
                 if (isMalicious) {
                     err = client.UpdateDocFile_malicious(conn, filename, docID, useMaster)
                 } else if (isPlaintext) {
-                    err = client.UpdateDocFile_plaintext(conn, filename, docID, useMaster)
+                    bw, err = client.UpdateDocFile_plaintext(conn, filename, docID, useMaster)
+                    bwTotal += bw
                 }else {
                     err = client.UpdateDocFile_semihonest(conn, filename, docID, useMaster)
                 }
@@ -341,7 +347,7 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
     }
 
     log.Printf("Average update time: %s ms\n", strconv.FormatFloat(elapsed, 'f', 3, 64))
-    log.Printf("%s\n", strconv.FormatFloat(elapsed, 'f', 3, 64))
+    log.Printf("%s %s\n", strconv.FormatFloat(float64(bwTotal)/float64(ctr), 'f', 3, 64), strconv.FormatFloat(elapsed, 'f', 3, 64))
 
     /* Clean up */
     if (useMaster && !isPlaintext) {
@@ -563,6 +569,7 @@ func main() {
     onlySetup := flag.Bool("only_setup", false, "only setup")
     latencyPrints := flag.Bool("latency_prints", false, "print out extra latency information")
     latencyBench := flag.Bool("latency_bench", false, "run latency benchmarks")
+    totalIterations := flag.Int("total_iterations", 1000, "number of docs for update benchmark")
     flag.Parse()
 
     if (*runTests) {
@@ -575,7 +582,7 @@ func main() {
     } else if (*runThroughput && *numClusters > 0) {
         runThroughputClustersBenchmark(*filename, *numDocs, *bloomFilterSz, *isMalicious, *leaky, *plaintext, *useMaster, *throughputSec, *throughputThreads, *numUpdates, *numSearches, *numClusters)
     } else if (*updateBench) {
-        runDirBenchmark(*filename, *benchmarkDir, *bloomFilterSz, *numDocs, *isMalicious, *plaintext, *useMaster)
+        runDirBenchmark(*filename, *benchmarkDir, *bloomFilterSz, *numDocs, *isMalicious, *plaintext, *useMaster, *totalIterations)
     } else if (*latencyBench) {
         runArtificialBenchmark(*filename, *numDocs, *bloomFilterSz, *isMalicious, *leaky, *plaintext, *fastSetup, *useMaster, *latencyPrints)
     } else if (*numClusters > 0) {

@@ -278,7 +278,12 @@ func UpdateDoc_plaintext(conn *common.Conn, keywords []string, docID int, useMas
             req,
         )
     }
-    return int(unsafe.Sizeof(req)), nil
+    sz := 0
+    for i := range(keywords) {
+        sz += len(keywords[i])
+    }
+    sz += int(unsafe.Sizeof(docID))
+    return sz, nil
 }
 
 /* Send dummy update (only used for throughput measurements for semihonest adversaries). */
@@ -362,6 +367,20 @@ func UpdateDocFile_plaintext(conn *common.Conn, filename string, docID int, useM
     log.Println(filename)
     keywords := GetKeywordsFromFile(filename)
     return UpdateDoc_plaintext(conn, keywords, docID, useMaster)
+}
+
+func GetIndexSize_plaintext() (int, error) {
+    req := &common.IndexSzRequest{}
+    resp := &common.IndexSzResponse{}
+    var respErr error
+    common.SendMessage(
+        config.Addr[0] + config.Port[0],
+        common.INDEX_SZ_REQUEST,
+        req,
+        resp,
+        &respErr,
+    )
+    return resp.Size, nil
 }
 
 func SearchKeyword_malicious(conn *common.Conn, keyword string, useMaster bool) ([]byte, error, time.Duration, time.Duration, time.Duration, time.Duration, time.Duration) {
@@ -749,8 +768,9 @@ func SearchKeyword_plaintext(keyword string) ([]int, int, error) {
             resp,
             &respError,
         )
+    sz := len(keyword) + (len(resp.Results) * int(unsafe.Sizeof(resp.Results[0])))
 
-    return resp.Results, int(unsafe.Sizeof(req) + unsafe.Sizeof(resp)), nil
+    return resp.Results, sz, nil
 }
 
 func RunFastSetup(benchmarkDir string, useMaster bool) error {

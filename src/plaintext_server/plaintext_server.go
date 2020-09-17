@@ -26,6 +26,7 @@ import (
     "time"
     "strconv"
     "io"
+    "unsafe"
 )
 
 var config common.ServerConfig
@@ -102,6 +103,22 @@ func handleConnection(conn net.Conn) {
             updateDoc_plaintext(req)
 
 
+        case common.INDEX_SZ_REQUEST:
+            var req common.IndexSzRequest
+            if err := dec.Decode(&req); err != nil {
+                log.Fatalln(err)
+            }
+            resp, respErr := getIndexSize()
+            if err := enc.Encode(&respErr); err != nil {
+                log.Fatalln(err)
+            }
+            if err := enc.Encode(&resp); err != nil {
+                log.Fatalln(err)
+            }
+            if err := w.Flush(); err != nil {
+                log.Fatalln(err)
+            }
+
         case common.BATCH_START_REQUEST:
             var req common.BatchStartRequest
             if err := dec.Decode(&req); err != nil {
@@ -141,13 +158,24 @@ func handleConnection(conn net.Conn) {
 
 }
 
-/* Log latency to file in separate thread. */
 func logLatency (latency time.Duration, tag string) {
     go func(latency time.Duration, tag string) {
         file, _ := os.Create(config.OutDir + "/" + strconv.Itoa(int(C.NUM_DOCS)) + "_docs_" + strconv.Itoa(int(C.BLOOM_FILTER_SZ)) + "bf_latency_" + tag)
         defer file.Close()
         io.WriteString(file, latency.String())
     }(latency, tag)
+}
+
+func getIndexSize() (common.IndexSzResponse, error) {
+    sz := 0
+    for keyword := range(newIndex) {
+        sz += len(keyword)
+        sz += len(newIndex[keyword]) * int(unsafe.Sizeof(newIndex[keyword][0]))
+    }
+    resp := common.IndexSzResponse{
+        Size: sz,
+    }
+    return resp, nil
 }
 
 /* Process search request (malicious adversaries). */

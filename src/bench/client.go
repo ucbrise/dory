@@ -336,6 +336,12 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
 
     log.Println("Finished updates")
 
+    indexSz := 0
+    if (isPlaintext) {
+        time.Sleep(5000 * time.Millisecond)
+        indexSz, _ = client.GetIndexSize_plaintext()
+    }
+
     file, err := os.Create(outFile + "_UPDATE")
     if err != nil {
         log.Println(err)
@@ -347,7 +353,7 @@ func runDirBenchmark(configFile string, benchmarkDir string, bloomFilterSz int, 
     }
 
     log.Printf("Average update time: %s ms\n", strconv.FormatFloat(elapsed, 'f', 3, 64))
-    log.Printf("%s %s\n", strconv.FormatFloat(float64(bwTotal)/float64(ctr), 'f', 3, 64), strconv.FormatFloat(elapsed, 'f', 3, 64))
+    log.Printf("%d %s %s\n", indexSz, strconv.FormatFloat(float64(bwTotal)/float64(ctr), 'f', 3, 64), strconv.FormatFloat(elapsed, 'f', 3, 64))
 
     /* Clean up */
     if (useMaster && !isPlaintext) {

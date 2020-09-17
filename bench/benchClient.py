@@ -132,7 +132,8 @@ def startPlaintextServers(tickMs):
     print(replica1Cmd)
     processes.append(subprocess.Popen(generateRemoteCmdStr(replicas[0], replica1Cmd),
         shell=True, stdout=devNull, stderr=devNull))
- 
+    return processes
+
 
 def startOramServer(oramServer, numDocs):
     serverCmd = ("sudo lsof -t -i tcp:4441 | sudo xargs kill > /dev/null &> /dev/null; sleep 1; cd dory/baseline; export GOPATH=/home/ec2-user/dory/baseline; go run src/server/run_server.go -n %s") % (numDocs)
@@ -293,8 +294,8 @@ def cleanupForDoryMixedThroughput(servers):
 
 def runPlaintextUpdateSetup(tickMs, totalIterations):
     servers = startPlaintextServers(tickMs)
-    latencies, runLatencyClient(generateUpdateLatencyClientLocalStr(128, 128, False, False, True, totalIterations))
-    return latencies[len(latencies) - 1], latencies[len(latencies) - 2], servers
+    latencies = runLatencyClient(generateUpdateLatencyClientLocalStr(128, 128, False, False, True, totalIterations))
+    return latencies[len(latencies) - 1], latencies[len(latencies) - 2], latencies[len(latencies) - 3], servers
 
 def runUpdateLatencyTest(bloomFilterSz, numDocs, tickMs, isMalicious, isLeaky, totalIterations):
     print (("Starting Dory with bloom filter size %s, num docs %s, is malicious %s") % (bloomFilterSz, numDocs, isMalicious))

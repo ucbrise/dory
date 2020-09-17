@@ -152,6 +152,12 @@ type SetupResponse struct {
     Versions        []uint32
 }
 
+type IndexSzRequest struct {}
+
+type IndexSzResponse struct {
+    Size            int
+}
+
 type MasterSetupRequest struct {
     NumDocs         int
     Versions        []uint32
@@ -202,4 +208,5 @@ const (
     GET_STATE_REQUEST
     BATCH_START_REQUEST
     BATCH_FINISH_REQUEST
+    INDEX_SZ_REQUEST
 )

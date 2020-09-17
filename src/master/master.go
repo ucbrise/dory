@@ -86,52 +86,77 @@ func start2PC(version int, updateMapCopy map[int]common.Update, plaintextUpdateM
     finalCommit := true
     var finalCommitLock sync.Mutex
 
-    var wg1 sync.WaitGroup
-    wg1.Add(2 * numClusters)
 
-    for i := 0; i < 2 * numClusters; i+= 1 {
-        go func(i int) {
-            var commitRespError error
-            commitResp := &common.BatchStartResponse{}
-            defer wg1.Done()
-            common.SendMessage(
-                config.Addr[i] + config.Port[i],
-                common.BATCH_START_REQUEST,
-                commitReq,
-                commitResp,
-                &commitRespError,
-            )
-            finalCommitLock.Lock()
-            finalCommit = commitResp.Commit
-            finalCommitLock.Unlock()
-        }(i)
+    if (len(plaintextUpdateMapCopy) > 0) {
+        var commitRespError error
+        commitResp := &common.BatchStartResponse{}
+        common.SendMessage(
+            config.Addr[0] + config.Port[0],
+            common.BATCH_START_REQUEST,
+            commitReq,
+            commitResp,
+            &commitRespError,
+        )
+        finalCommit = commitResp.Commit
+    } else {
+        var wg1 sync.WaitGroup
+        wg1.Add(2 * numClusters)
+
+        for i := 0; i < 2 * numClusters; i+= 1 {
+            go func(i int) {
+                var commitRespError error
+                commitResp := &common.BatchStartResponse{}
+                defer wg1.Done()
+                common.SendMessage(
+                    config.Addr[i] + config.Port[i],
+                    common.BATCH_START_REQUEST,
+                    commitReq,
+                    commitResp,
+                    &commitRespError,
+                )
+                finalCommitLock.Lock()
+                finalCommit = commitResp.Commit
+                finalCommitLock.Unlock()
+            }(i)
+        }
+        wg1.Wait()
     }
 
-    wg1.Wait()
 
     finishReq := &common.BatchFinishRequest{
         Commit:     finalCommit,
     }
 
-    var wg2 sync.WaitGroup
-    wg2.Add(2 * numClusters)
+    if (len(plaintextUpdateMapCopy) > 0) {
+        finishResp := &common.BatchFinishResponse{}
+        var finishRespError error
+        common.SendMessage(
+            config.Addr[0] + config.Port[0],
+            common.BATCH_FINISH_REQUEST,
+            finishReq,
+            finishResp,
+            &finishRespError,
+        );
+    } else {
+        var wg2 sync.WaitGroup
+        wg2.Add(2 * numClusters)
 
-    for i := 0; i < 2 * numClusters; i += 1 {
-        go func(i int) {
-            finishResp := &common.BatchFinishResponse{}
-            var finishRespError error
-            defer wg2.Done()
-            common.SendMessage(
-                config.Addr[i] + config.Port[i],
-                common.BATCH_FINISH_REQUEST,
-                finishReq,
-                finishResp,
-                &finishRespError,
-            )
-        }(i)
+        for i := 0; i < 2 * numClusters; i += 1 {
+            go func(i int) {
+                finishResp := &common.BatchFinishResponse{}
+                var finishRespError error
+                defer wg2.Done()
+                common.SendMessage(
+                    config.Addr[i] + config.Port[i],
+                    common.BATCH_FINISH_REQUEST,
+                    finishReq,
+                    finishResp,
+                    &finishRespError,
+                )
+            }(i)
+        }
+        wg2.Wait()
     }
-
-    wg2.Wait()
 
 }
 
@@ -169,6 +194,7 @@ func updateDoc_malicious(req common.UpdateRequest_malicious) (common.UpdateRespo
 
 func updateDoc_plaintext(req common.UpdateRequest_plaintext) (common.UpdateResponse_plaintext, error) {
 
+    updatePlaintextIndexLock.Lock()
     for _, keyword := range req.Keywords {
         if _, ok := updatePlaintextIndex[keyword]; ok {
             for _, docID := range updatePlaintextIndex[keyword] {
@@ -181,6 +207,7 @@ func updateDoc_plaintext(req common.UpdateRequest_plaintext) (common.UpdateRespo
             updatePlaintextIndex[keyword] = []int{req.DocID}
         }
     }
+    updatePlaintextIndexLock.Unlock()
 
     return common.UpdateResponse_plaintext{Test: "success"}, nil
 
@@ -366,6 +393,7 @@ func main() {
     updateLocks = make([]sync.Mutex, maxDocs)
 
     go tickLoop()
+    go tickLoop_plaintext()
 
     /* Start listening */
     log.Println("Listening...")

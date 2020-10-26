@@ -294,6 +294,7 @@ def cleanupForDoryMixedThroughput(servers):
 
 def runPlaintextUpdateSetup(tickMs, totalIterations):
     servers = startPlaintextServers(tickMs)
+    time.sleep(3)
     latencies = runLatencyClient(generateUpdateLatencyClientLocalStr(128, 128, False, False, True, totalIterations))
     return latencies[len(latencies) - 1], latencies[len(latencies) - 2], latencies[len(latencies) - 3], servers
 

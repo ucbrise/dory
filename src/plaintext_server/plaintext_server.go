@@ -225,7 +225,7 @@ func startUpdateBatch(req common.BatchStartRequest) (common.BatchStartResponse, 
 /* Finish processing incoming batch of updates from master. */
 func finishUpdateBatch(req common.BatchFinishRequest) (common.BatchFinishResponse, error) {
     for k,v := range newIndex {
-        newIndex[k] = v
+        oldIndex[k] = v
     }
     oldVersionNum =  newVersionNum
     /* Process all incoming updates. */

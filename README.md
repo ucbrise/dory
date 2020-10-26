@@ -2,7 +2,7 @@
 
 DORY is an encrypted search system that splits trust between multiple servers in order to efficiently hide access patterns from a malicious attacker who controls all but one of the servers. This implementation contains our DORY search protocol as described in the OSDI20 paper and does not include a complementary end-to-end encrypted filesystem that could use or interface with DORY.
 
-This implementation accompanies our paper "DORY: An Encrypted Search System with Distributed Trust" by Emma Dauterman, Eric Feng, Ellen Luo, Raluca Ada Popa, and Ion Stoica to appear at OSDI20
+This implementation accompanies our paper [DORY: An Encrypted Search System with Distributed Trust](https://eprint.iacr.org/2020/1280) by Emma Dauterman, Eric Feng, Ellen Luo, Raluca Ada Popa, and Ion Stoica to appear at OSDI20
 
 **WARNING**: This is an academic proof-of-concept prototype and has not received careful code review. This implementation is NOT ready for production use.
 
